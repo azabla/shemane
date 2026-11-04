@@ -19,8 +19,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Liberu\Ecommerce\Contracts\Modules\Abilities;
+use Liberu\Ecommerce\Contracts\Modules\ModuleDefinition;
 use Liberu\Ecommerce\Contracts\Modules\ModuleNotActive;
 use Liberu\Ecommerce\Contracts\Modules\ModuleState;
+use Liberu\Ecommerce\Contracts\Modules\ProvidesConfigurationPage;
 use Liberu\Ecommerce\FixtureSupplier\Filament\FixturePage;
 use Liberu\Ecommerce\FixtureSupplier\FixtureClient;
 use Liberu\Ecommerce\FixtureSupplier\FixtureDefinition;
@@ -319,6 +321,31 @@ class StoreModuleLifecycleTest extends TestCase
 
         $this->merchant('viewer');
         $this->assertFalse(FixturePage::canAccess());
+    }
+
+    public function test_a_module_can_configure_on_its_own_page_instead_of_the_generated_form(): void
+    {
+        $definition = new class extends FixtureDefinition implements ProvidesConfigurationPage
+        {
+            public function key(): string
+            {
+                return 'fixture-own-page';
+            }
+
+            public function configurationUrl(int $storeId): string
+            {
+                return "https://shop.test/fixture-settings/{$storeId}";
+            }
+        };
+        $this->app->instance('fixture-own-page', $definition);
+        $this->app->tag('fixture-own-page', ModuleDefinition::class);
+        $this->app->forgetScopedInstances();
+
+        app(StoreModules::class)->setAvailable('fixture-own-page', $this->storeA->id, true);
+        $this->merchant();
+
+        Livewire::test(Integrations::class)
+            ->assertTableActionHasUrl('configure', "https://shop.test/fixture-settings/{$this->storeA->id}", 'fixture-own-page');
     }
 
     private function assertRefused(callable $action): void

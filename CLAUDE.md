@@ -139,6 +139,7 @@ decided. See [`docs/THEMES.md`](./docs/THEMES.md).
 | [`docs/CONFORMANCE.md`](./docs/CONFORMANCE.md) | A dated snapshot of the gap between this repo and the reference design. Not edited |
 | [`docs/MIGRATION_PLAN.md`](./docs/MIGRATION_PLAN.md) | Living. Sequences the structural work and records each wave as it lands |
 | [`docs/MODULE_DEVELOPMENT.md`](./docs/MODULE_DEVELOPMENT.md) | Package, repository and namespace naming; the dependency rules |
+| [`docs/MODULE_ARCHITECTURE.md`](./docs/MODULE_ARCHITECTURE.md) | How modules are installed, activated per store and built; what is still open |
 | [`docs/THEMES.md`](./docs/THEMES.md) | Storefront themes: per-channel view overrides, tokens, the presentation contract |
 | [`docs/adr/`](./docs/adr/) | One decision per file |
 | [`docs/agents/`](./docs/agents/) | Issue tracker, triage labels, domain docs |

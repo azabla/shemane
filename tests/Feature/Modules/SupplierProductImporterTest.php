@@ -5,6 +5,7 @@ namespace Tests\Feature\Modules;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Store;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Liberu\Ecommerce\Contracts\Catalog\ImportedProduct;
 use Liberu\Ecommerce\Contracts\Catalog\ImportedVariant;
@@ -72,7 +73,7 @@ class SupplierProductImporterTest extends TestCase
         $this->assertSame($own->id, $importer->import($a->id, $this->hoodie(), $own->id));
         $this->assertSame('Kept name', $own->fresh()->name);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
         $importer->import($a->id, $this->hoodie(), $other->id);
     }
 }
