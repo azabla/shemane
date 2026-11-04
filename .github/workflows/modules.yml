@@ -38,6 +38,8 @@ jobs:
       - run: php artisan key:generate
       - name: Installed manifests are valid
         run: php artisan module:validate
+      - name: Themes are valid
+        run: php artisan theme:validate
       - name: Nothing optional boots by default
         run: |
           php artisan module:list --json | python3 -c "
@@ -66,6 +68,27 @@ jobs:
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: php artisan key:generate
       - run: .github/scripts/verify-module.sh "${{ matrix.name }}" "${{ matrix.package }}" "${{ matrix.repository }}"
+
+  # A theme installed by Composer, built by Vite, with its own classes in the CSS.
+  installed-theme:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.5'
+          extensions: mbstring, pdo, pdo_sqlite, bcmath, zip, gd, intl
+          coverage: none
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26'
+          cache: npm
+      - run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: php artisan key:generate
+      - run: npm ci
+      - run: .github/scripts/verify-theme.sh
 
   # SQLite accepted a CAST that MySQL refuses, and that reached a site. These are the database-sensitive paths.
   mysql:

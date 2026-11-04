@@ -8,6 +8,7 @@ use App\Models\Store;
 use App\Models\User;
 use App\Support\StoreAccess;
 use App\Support\StorefrontTheme;
+use App\Support\StorefrontThemes;
 use App\Support\TeamPermission;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(StorefrontTheme::class, fn ($app) => new StorefrontTheme($app['view']->getFinder(), base_path('themes')));
+        $this->app->singleton(StorefrontThemes::class, fn () => new StorefrontThemes(base_path('themes')));
         $this->app->bind(StripeClient::class, fn () => new StripeClient(config('services.stripe.secret')));
     }
 

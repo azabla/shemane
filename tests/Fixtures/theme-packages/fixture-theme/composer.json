@@ -1,0 +1,11 @@
+{
+    "name": "liberusoftware/ecommerce-fixture-theme",
+    "description": "Acceptance fixture for distributing a storefront theme. Never published.",
+    "type": "liberu-theme",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "liberusoftware/ecommerce-contracts": "^1.0"
+    },
+    "extra": { "liberu": { "name": "fixture-theme" } }
+}

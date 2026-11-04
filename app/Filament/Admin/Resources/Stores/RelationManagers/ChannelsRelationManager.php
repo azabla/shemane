@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Stores\RelationManagers;
 
 use App\Filament\Admin\Resources\Channels\ChannelResource;
+use App\Filament\Schemas\ChannelThemeField;
 use App\Models\Channel;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -21,8 +22,8 @@ class ChannelsRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            // `theme` stays at its default until theme packages select per channel.
             TextInput::make('name')->required()->maxLength(255),
+            ChannelThemeField::make(),
         ]);
     }
 

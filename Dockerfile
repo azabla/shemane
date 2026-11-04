@@ -31,6 +31,9 @@ COPY composer.json composer.lock ./
 COPY modules/users-roles ./modules/users-roles
 COPY packages ./packages
 
+# Composer writes liberu-module and liberu-theme packages here; both must exist for the COPYs below.
+RUN mkdir -p modules themes
+
 # Install composer dependencies (no autoloader yet, will optimize in final stage)
 RUN composer install \
     --no-dev \
@@ -77,6 +80,7 @@ COPY . .
 # same --no-dev tree the application itself ships.
 COPY --from=composer-deps /app/vendor ./vendor
 COPY --from=composer-deps /app/modules ./modules
+COPY --from=composer-deps /app/themes ./themes
 
 # Builds all three vite inputs: resources/css/app.css, resources/js/app.js and
 # resources/css/filament/admin/theme.css.
@@ -188,6 +192,7 @@ COPY --chown=${USER}:${USER} . .
 # Composer installs modules outside vendor/, and some are not in the build context. On top of
 # COPY . . so the image runs the versions composer.lock names, not whatever the tree holds.
 COPY --chown=${USER}:${USER} --from=composer-deps /app/modules ./modules
+COPY --chown=${USER}:${USER} --from=composer-deps /app/themes ./themes
 
 # After `COPY . .`, deliberately: the built assets must land on top of the source
 # tree, not be overwritten by it. public/build is excluded in .dockerignore so

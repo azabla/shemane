@@ -49,8 +49,28 @@ themes/<name>/
 }
 ```
 
-Names are lowercase letters, digits and hyphens. **Do not add a `composer.json`.** The
-`sync-packages` workflow publishes any `themes/*` directory that has one as a public package.
+Names are lowercase letters, digits and hyphens, and `name` must match the directory. `requires` is optional: `{"liberusoftware/ecommerce-contracts": "^1.0"}` states the version of the platform's contracts the theme was built for. `php artisan theme:validate` checks all of this, and CI fails on any fault.
+
+## A site's theme, or a distributed one
+
+| | In the site's repository | Distributed as a package |
+| --- | --- | --- |
+| Lives at | `themes/<name>/`, tracked | `themes/<name>/`, put there by Composer |
+| `composer.json` | **None** | `type: liberu-theme`, `extra.liberu.name` matching the directory |
+| In Git | Yes | No: add `/themes/<name>/` to `.gitignore` |
+
+A tracked theme must not have a `composer.json`, because the `sync-packages` workflow publishes any tracked one as a public package. CI enforces this.
+
+To install a distributed theme, run `composer require vendor/theme-name`, add its directory to `.gitignore`, and rebuild the frontend: `vite.config.js` reads every `theme.json` in `themes/` for its entry points. Then choose it on the channel in **Stores → Channels**. The image carries Composer-installed themes into both its asset and final stages.
+
+A distributed theme must name its own views in its CSS, because Tailwind's auto-detection skips gitignored paths:
+
+```css
+@import 'tailwindcss';
+@source '../views';
+```
+
+A module's views can be overridden at `themes/<name>/resources/views/vendor/<namespace>/`, the same as any package's.
 
 ## Where to change what
 

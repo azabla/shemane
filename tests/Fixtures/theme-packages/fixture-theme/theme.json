@@ -1,0 +1,8 @@
+{
+    "name": "fixture-theme",
+    "display_name": "Fixture Theme",
+    "type": "public",
+    "parent": "theme-ecommerce",
+    "requires": { "liberusoftware/ecommerce-contracts": "^1.0" },
+    "assets": { "css": ["resources/css/app.css"] }
+}

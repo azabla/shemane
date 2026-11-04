@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+
+/* A Composer-installed theme is gitignored, and Tailwind's auto-detection skips ignored paths. */
+@source '../views';

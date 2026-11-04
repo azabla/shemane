@@ -6,6 +6,8 @@ use App\Console\Commands\Modules\ModuleCacheCommand;
 use App\Console\Commands\Modules\ModuleListCommand;
 use App\Console\Commands\Modules\ModuleStatusCommand;
 use App\Console\Commands\Modules\ModuleValidateCommand;
+use App\Console\Commands\Modules\ThemeListCommand;
+use App\Console\Commands\Modules\ThemeValidateCommand;
 use App\Integrations\Dropxl\DropxlDefinition;
 use App\Integrations\Dropxl\DropxlFulfilment;
 use App\Services\Fulfilment\FulfilmentProviders;
@@ -81,6 +83,8 @@ class ModuleServiceProvider extends ServiceProvider
                 ModuleValidateCommand::class,
                 ModuleStatusCommand::class,
                 ModuleCacheCommand::class,
+                ThemeListCommand::class,
+                ThemeValidateCommand::class,
                 ClearModulesCommand::class,
                 ListFeaturesCommand::class,
             ]);
