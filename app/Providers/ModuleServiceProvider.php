@@ -6,12 +6,15 @@ use App\Console\Commands\Modules\ModuleCacheCommand;
 use App\Console\Commands\Modules\ModuleListCommand;
 use App\Console\Commands\Modules\ModuleStatusCommand;
 use App\Console\Commands\Modules\ModuleValidateCommand;
+use App\Services\Fulfilment\FulfilmentProviders;
+use App\Services\Fulfilment\SupplierProductImporter;
 use App\Support\Modules\ModuleInventory;
 use App\Support\Modules\ModuleLoader;
 use App\Support\Modules\RequiredModuleFailed;
 use App\Support\Modules\StoreModules;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
 use Liberu\Ecommerce\Contracts\Modules\ModuleState;
 use Liberu\Foundation\ModuleManager\Cache\RegistryCache;
 use Liberu\Foundation\ModuleManager\Console\ClearModulesCommand;
@@ -39,6 +42,8 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleRegistry::class, fn ($app) => new ModuleRegistry($app->make(ModuleInventory::class)->manifests));
         $this->app->scoped(StoreModules::class);
         $this->app->alias(StoreModules::class, ModuleState::class);
+        $this->app->scoped(FulfilmentProviders::class);
+        $this->app->bind(ProductImporter::class, SupplierProductImporter::class);
 
         $inventory = $this->app->make(ModuleInventory::class);
 

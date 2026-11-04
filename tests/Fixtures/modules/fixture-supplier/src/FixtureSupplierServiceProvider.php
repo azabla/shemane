@@ -3,6 +3,7 @@
 namespace Liberu\Ecommerce\FixtureSupplier;
 
 use Illuminate\Support\ServiceProvider;
+use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentProvider;
 use Liberu\Ecommerce\Contracts\Modules\ModuleDefinition;
 
 class FixtureSupplierServiceProvider extends ServiceProvider
@@ -11,6 +12,7 @@ class FixtureSupplierServiceProvider extends ServiceProvider
     {
         $this->app->instance('fixture-supplier.booted', true);
         $this->app->tag(FixtureDefinition::class, ModuleDefinition::class);
+        $this->app->tag(FixtureFulfilment::class, FulfilmentProvider::class);
     }
 
     public function boot(): void
