@@ -19,6 +19,7 @@ Gaps become findings, never silent exemptions. A deviation without an ADR is a b
 | [0011](./0011-adopting-module-manager.md) | Adopting `module-manager` drops runtime module enablement | behaviour loss |
 | [0012](./0012-deleting-the-empty-cms-scaffolds.md) | The Article/FAQ and `seo_settings` scaffolds are deleted, not moved | behaviour loss |
 | [0013](./0013-cms-and-crm-packages-are-built-from-ground.md) | CMS and CRM packages are built from ground; local code is deleted at cutover | supersedes a deferral |
+| [0014](./0014-host-module-registration.md) | The host registers modules with the manager's classes, not its provider | deviation — `MODULES.md` §6 |
 
 Every deviation above also has an upstream issue filed against the document it deviates from — all 23 are filed. One of the 23, [`documentation` #20](https://github.com/liberusoftware/documentation/issues/20), is withdrawn along with ADR 0010: this repository no longer wants §3.2 changed.
 

@@ -1,0 +1,12 @@
+{
+    "name": "fixture-supplier",
+    "display_name": "Fixture Supplier",
+    "description": "Acceptance fixture for the module system.",
+    "version": "1.0.0",
+    "category": "adapter",
+    "provider": "Liberu\\Ecommerce\\FixtureSupplier\\FixtureSupplierServiceProvider",
+    "requires": { "php": "^8.5", "laravel": "^13.0", "packages": {} },
+    "capabilities": ["ecommerce.fixture-supplier"],
+    "default_enabled": false,
+    "features": ["Proves the module lifecycle"]
+}

@@ -94,7 +94,10 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "liberusoftware/tenancy",
+                "liberusoftware/users-roles"
+            ]
         }
     },
     "config": {

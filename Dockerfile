@@ -75,6 +75,7 @@ COPY . .
 # developer's dev-dependency-laden copy cannot ride in, and this stage gets the
 # same --no-dev tree the application itself ships.
 COPY --from=composer-deps /app/vendor ./vendor
+COPY --from=composer-deps /app/modules ./modules
 
 # Builds all three vite inputs: resources/css/app.css, resources/js/app.js and
 # resources/css/filament/admin/theme.css.
@@ -182,6 +183,10 @@ COPY --chown=${USER}:${USER} composer.json composer.lock ./
 
 # Copy application code first so autoloader can resolve all files
 COPY --chown=${USER}:${USER} . .
+
+# Composer installs modules outside vendor/, and some are not in the build context. On top of
+# COPY . . so the image runs the versions composer.lock names, not whatever the tree holds.
+COPY --chown=${USER}:${USER} --from=composer-deps /app/modules ./modules
 
 # After `COPY . .`, deliberately: the built assets must land on top of the source
 # tree, not be overwritten by it. public/build is excluded in .dockerignore so

@@ -9,6 +9,7 @@ use App\Providers\Filament\AppPanelProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\HorizonServiceProvider;
 use App\Providers\JetstreamServiceProvider;
+use App\Providers\ModuleServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
@@ -174,6 +175,8 @@ return [
         /*
          * Application Service Providers...
          */
+        // First, so a module's bindings exist before the panels and the app are configured.
+        ModuleServiceProvider::class,
         AppServiceProvider::class,
         AuthServiceProvider::class,
         BroadcastServiceProvider::class,

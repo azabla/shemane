@@ -1,0 +1,10 @@
+{
+    "name": "liberusoftware/ecommerce-fixture-supplier",
+    "description": "Acceptance fixture for the module system. Never published or installed in production.",
+    "type": "liberu-module",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {},
+    "autoload": { "psr-4": { "Liberu\\Ecommerce\\FixtureSupplier\\": "src/" } },
+    "extra": { "liberu": { "name": "fixture-supplier" } }
+}

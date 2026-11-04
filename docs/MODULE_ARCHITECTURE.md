@@ -4,8 +4,11 @@ _Assessed 2026-11-04 against core `main` (`5b3a0c67`), the five site repositorie
 `liberusoftware` packages. Reassessed the same day after merging `upstream/main` (`e6b55076`) into the
 core. Paths are relative to the repository root._
 
-**Status: proposal.** Nothing here is implemented, apart from the one-line CI guard fix in §7.3.
-Sections 1 and 2 are findings from the code. Sections 3 to 9 are recommendations.
+**Status: being implemented on `feat/module-system`.** Section 2 records what was found before that work.
+
+| Phase | State |
+| --- | --- |
+| 1. Make the module manager real | Done. `App\Providers\ModuleServiceProvider` is the only registrar ([ADR 0014](./adr/0014-host-module-registration.md)) |
 
 ## 1. Summary
 
