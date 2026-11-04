@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Integrations\Printful;
+namespace Liberu\Ecommerce\Printful;
 
 use Liberu\Ecommerce\Contracts\Fulfilment\ChecksAvailability;
 use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentLine;

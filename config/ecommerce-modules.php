@@ -6,5 +6,10 @@
 */
 
 return [
-    'catalogue' => [],
+    'catalogue' => [
+        'ecommerce-printful' => [
+            'package' => 'liberusoftware/ecommerce-printful',
+            'description' => 'Printful print-on-demand fulfilment and catalogue import.',
+        ],
+    ],
 ];

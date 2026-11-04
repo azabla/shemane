@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Integrations\Printful;
+namespace Liberu\Ecommerce\Printful;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;

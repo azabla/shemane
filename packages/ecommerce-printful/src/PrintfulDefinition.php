@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Integrations\Printful;
+namespace Liberu\Ecommerce\Printful;
 
 use Liberu\Ecommerce\Contracts\Modules\ModuleDefinition;
 use Liberu\Ecommerce\Contracts\Modules\SettingField;

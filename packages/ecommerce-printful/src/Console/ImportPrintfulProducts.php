@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Liberu\Ecommerce\Printful\Console;
 
-use App\Integrations\Printful\PrintfulCatalog;
-use App\Integrations\Printful\PrintfulDefinition;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
 use Liberu\Ecommerce\Contracts\Modules\ModuleState;
+use Liberu\Ecommerce\Printful\PrintfulCatalog;
+use Liberu\Ecommerce\Printful\PrintfulDefinition;
 use Throwable;
 
 class ImportPrintfulProducts extends Command

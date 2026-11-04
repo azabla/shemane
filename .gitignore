@@ -1,5 +1,7 @@
 /vendor/
 /modules/module-manager/
+/modules/ecommerce-*/
+/modules/fixture-*/
 node_modules/
 npm-debug.log
 yarn-error.log

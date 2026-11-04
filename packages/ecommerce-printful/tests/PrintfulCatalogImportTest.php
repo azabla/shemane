@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Feature;
+namespace Liberu\Ecommerce\Printful\Tests;
 
-use App\Integrations\Printful\PrintfulCatalog;
-use App\Integrations\Printful\PrintfulDefinition;
 use App\Models\Product;
 use App\Models\Store;
 use App\Support\Modules\StoreModules;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
+use Liberu\Ecommerce\Printful\PrintfulCatalog;
+use Liberu\Ecommerce\Printful\PrintfulDefinition;
 use Tests\Feature\Concerns\ActivatesStoreModules;
 use Tests\Feature\Concerns\BuildsVariants;
 use Tests\TestCase;

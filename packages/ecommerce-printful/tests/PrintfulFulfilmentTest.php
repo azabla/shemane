@@ -1,8 +1,7 @@
 <?php
 
-namespace Tests\Feature;
+namespace Liberu\Ecommerce\Printful\Tests;
 
-use App\Integrations\Printful\PrintfulFulfilment;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -10,6 +9,7 @@ use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentLine;
 use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentRequest;
 use Liberu\Ecommerce\Contracts\Fulfilment\Recipient;
 use Liberu\Ecommerce\Contracts\Fulfilment\SupplierUnavailable;
+use Liberu\Ecommerce\Printful\PrintfulFulfilment;
 use Tests\TestCase;
 
 /** Printful's order, tracking and error behaviour, from the responses its API documents. */

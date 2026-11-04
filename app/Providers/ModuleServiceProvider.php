@@ -8,8 +8,6 @@ use App\Console\Commands\Modules\ModuleStatusCommand;
 use App\Console\Commands\Modules\ModuleValidateCommand;
 use App\Integrations\Dropxl\DropxlDefinition;
 use App\Integrations\Dropxl\DropxlFulfilment;
-use App\Integrations\Printful\PrintfulDefinition;
-use App\Integrations\Printful\PrintfulFulfilment;
 use App\Services\Fulfilment\FulfilmentProviders;
 use App\Services\Fulfilment\SupplierProductImporter;
 use App\Support\Modules\ModuleInventory;
@@ -89,10 +87,10 @@ class ModuleServiceProvider extends ServiceProvider
         }
     }
 
-    /** Integrations still in the core, activated per store exactly as a package would be. */
+    /** An integration still in the core, activated per store exactly as a package would be. */
     private function registerBuiltInIntegrations(): void
     {
-        $this->app->tag([DropxlDefinition::class, PrintfulDefinition::class], ModuleDefinition::class);
-        $this->app->tag([DropxlFulfilment::class, PrintfulFulfilment::class], FulfilmentProvider::class);
+        $this->app->tag(DropxlDefinition::class, ModuleDefinition::class);
+        $this->app->tag(DropxlFulfilment::class, FulfilmentProvider::class);
     }
 }
