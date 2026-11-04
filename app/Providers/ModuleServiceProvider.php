@@ -9,8 +9,10 @@ use App\Console\Commands\Modules\ModuleValidateCommand;
 use App\Support\Modules\ModuleInventory;
 use App\Support\Modules\ModuleLoader;
 use App\Support\Modules\RequiredModuleFailed;
+use App\Support\Modules\StoreModules;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
+use Liberu\Ecommerce\Contracts\Modules\ModuleState;
 use Liberu\Foundation\ModuleManager\Cache\RegistryCache;
 use Liberu\Foundation\ModuleManager\Console\ClearModulesCommand;
 use Liberu\Foundation\ModuleManager\Console\ListFeaturesCommand;
@@ -35,6 +37,8 @@ class ModuleServiceProvider extends ServiceProvider
         ));
         $this->app->singleton(ModuleInventory::class, fn ($app) => $app->make(ModuleLoader::class)->load());
         $this->app->singleton(ModuleRegistry::class, fn ($app) => new ModuleRegistry($app->make(ModuleInventory::class)->manifests));
+        $this->app->scoped(StoreModules::class);
+        $this->app->alias(StoreModules::class, ModuleState::class);
 
         $inventory = $this->app->make(ModuleInventory::class);
 

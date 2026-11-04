@@ -4,7 +4,17 @@
     "type": "liberu-module",
     "version": "1.0.0",
     "license": "MIT",
-    "require": {},
-    "autoload": { "psr-4": { "Liberu\\Ecommerce\\FixtureSupplier\\": "src/" } },
-    "extra": { "liberu": { "name": "fixture-supplier" } }
+    "require": {
+        "liberusoftware/ecommerce-contracts": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Liberu\\Ecommerce\\FixtureSupplier\\": "src/"
+        }
+    },
+    "extra": {
+        "liberu": {
+            "name": "fixture-supplier"
+        }
+    }
 }

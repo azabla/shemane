@@ -6,6 +6,7 @@ use App\Filament\App\Pages;
 use App\Filament\App\Pages\CreateTeam;
 use App\Filament\App\Pages\EditProfile;
 use App\Filament\App\Pages\EditTeam;
+use App\Filament\ModulePlugins;
 use App\Http\Middleware\TeamsPermission;
 use App\Listeners\SwitchTeam;
 use App\Models\Team;
@@ -61,6 +62,7 @@ class AppPanelProvider extends PanelProvider
                         ? url(EditProfile::getUrl())
                         : url($panel->getPath())),
             ])
+            ->plugins(app(ModulePlugins::class)->forPanel('app'))
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
             ->pages([

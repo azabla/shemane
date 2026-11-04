@@ -9,6 +9,7 @@ core. Paths are relative to the repository root._
 | Phase | State |
 | --- | --- |
 | 1. Make the module manager real | Done. `App\Providers\ModuleServiceProvider` is the only registrar ([ADR 0014](./adr/0014-host-module-registration.md)) |
+| 2. Per-store lifecycle | Done. `store_modules`, `StoreModules`, the admin Modules page and merchant Integrations page, proved by a fixture module ([ADR 0015](./adr/0015-per-store-module-activation.md)) |
 
 ## 1. Summary
 

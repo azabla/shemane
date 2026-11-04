@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2eb1e7855ae7509e39de1bbf341e3f2e",
+    "content-hash": "927ff670a3403f234674c990619a56b8",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5264,6 +5264,32 @@
                 "source": "https://github.com/liberusoftware/composer-installer/tree/1.1.0"
             },
             "time": "2026-08-05T07:59:00+00:00"
+        },
+        {
+            "name": "liberusoftware/ecommerce-contracts",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/ecommerce-contracts",
+                "reference": "79d538705b6ee2884c46e598f680d56e4e010e55"
+            },
+            "require": {
+                "php": "^8.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Contracts\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "The stable boundary between the Liberu ecommerce core and independently distributed modules.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
         },
         {
             "name": "liberusoftware/module-manager",

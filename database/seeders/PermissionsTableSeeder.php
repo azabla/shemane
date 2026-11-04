@@ -1432,6 +1432,13 @@ class PermissionsTableSeeder extends Seeder
                 'created_at' => '2026-08-17 00:00:00',
                 'updated_at' => '2026-08-17 00:00:00',
             ],
+            201 => [
+                'id' => 202,
+                'name' => 'manage_modules',
+                'guard_name' => 'web',
+                'created_at' => '2026-11-04 00:00:00',
+                'updated_at' => '2026-11-04 00:00:00',
+            ],
         ]);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();

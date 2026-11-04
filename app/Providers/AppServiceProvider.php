@@ -5,12 +5,17 @@ namespace App\Providers;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\Store;
+use App\Models\User;
+use App\Support\StoreAccess;
 use App\Support\StorefrontTheme;
+use App\Support\TeamPermission;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Liberu\Ecommerce\Contracts\Modules\Abilities;
 use Spatie\Permission\PermissionRegistrar;
 use Stripe\StripeClient;
 
@@ -35,6 +40,8 @@ class AppServiceProvider extends ServiceProvider
             $store = Store::current();
             $view->with('currentStore', $store)->with('storeName', $store?->name ?? config('app.name'));
         });
+
+        $this->defineModuleAbilities();
 
         app(PermissionRegistrar::class)
             ->setPermissionClass(Permission::class)
@@ -65,5 +72,23 @@ class AppServiceProvider extends ServiceProvider
             // sound against the declared type. isProduction() just delegates here.
             return $this->app->environment('production') ? $rule->uncompromised() : $rule;
         });
+    }
+
+    /** What modules ask instead of naming a role. Null when the store does not exist, so never the storefront's. */
+    private function defineModuleAbilities(): void
+    {
+        $abilities = [
+            Abilities::MANAGE_STORE => [TeamPermission::STORE_MANAGE, null],
+            Abilities::MANAGE_CATALOGUE => [TeamPermission::CATALOGUE_MANAGE, 'create_product'],
+            Abilities::MANAGE_ORDERS => [TeamPermission::ORDERS_MANAGE, 'update_order'],
+        ];
+
+        foreach ($abilities as $ability => [$permission, $platform]) {
+            Gate::define($ability, function (User $user, int $storeId) use ($permission, $platform) {
+                $store = Store::find($storeId);
+
+                return $store !== null && StoreAccess::allows($user, $permission, $store, $platform);
+            });
+        }
     }
 }
