@@ -6,6 +6,10 @@ use App\Console\Commands\Modules\ModuleCacheCommand;
 use App\Console\Commands\Modules\ModuleListCommand;
 use App\Console\Commands\Modules\ModuleStatusCommand;
 use App\Console\Commands\Modules\ModuleValidateCommand;
+use App\Integrations\Dropxl\DropxlDefinition;
+use App\Integrations\Dropxl\DropxlFulfilment;
+use App\Integrations\Printful\PrintfulDefinition;
+use App\Integrations\Printful\PrintfulFulfilment;
 use App\Services\Fulfilment\FulfilmentProviders;
 use App\Services\Fulfilment\SupplierProductImporter;
 use App\Support\Modules\ModuleInventory;
@@ -15,6 +19,8 @@ use App\Support\Modules\StoreModules;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
+use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentProvider;
+use Liberu\Ecommerce\Contracts\Modules\ModuleDefinition;
 use Liberu\Ecommerce\Contracts\Modules\ModuleState;
 use Liberu\Foundation\ModuleManager\Cache\RegistryCache;
 use Liberu\Foundation\ModuleManager\Console\ClearModulesCommand;
@@ -44,6 +50,7 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->alias(StoreModules::class, ModuleState::class);
         $this->app->scoped(FulfilmentProviders::class);
         $this->app->bind(ProductImporter::class, SupplierProductImporter::class);
+        $this->registerBuiltInIntegrations();
 
         $inventory = $this->app->make(ModuleInventory::class);
 
@@ -80,5 +87,12 @@ class ModuleServiceProvider extends ServiceProvider
                 ListFeaturesCommand::class,
             ]);
         }
+    }
+
+    /** Integrations still in the core, activated per store exactly as a package would be. */
+    private function registerBuiltInIntegrations(): void
+    {
+        $this->app->tag([DropxlDefinition::class, PrintfulDefinition::class], ModuleDefinition::class);
+        $this->app->tag([DropxlFulfilment::class, PrintfulFulfilment::class], FulfilmentProvider::class);
     }
 }

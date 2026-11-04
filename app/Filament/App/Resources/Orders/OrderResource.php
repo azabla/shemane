@@ -5,6 +5,7 @@ namespace App\Filament\App\Resources\Orders;
 use App\Filament\App\Resources\Orders\Pages\CreateOrder;
 use App\Filament\App\Resources\Orders\Pages\EditOrder;
 use App\Filament\App\Resources\Orders\Pages\ListOrders;
+use App\Filament\App\Resources\Orders\RelationManagers\FulfilmentsRelationManager;
 use App\Filament\Schemas\StoreField;
 use App\Models\Customer;
 use App\Models\Order;
@@ -201,7 +202,7 @@ class OrderResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [FulfilmentsRelationManager::class];
     }
 
     public static function getPages(): array

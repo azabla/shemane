@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ContactRequest;
 use App\Models\Order;
+use App\Models\OrderFulfilment;
 use App\Models\ProductRating;
 use App\Models\ProductReview;
 use App\Models\User;
@@ -91,7 +92,11 @@ class GdprErasureService
             $query->orWhere('customer_id', $customerId);
         }
 
+        // A supplier's answer can repeat the address it was sent.
+        OrderFulfilment::query()->whereIn('order_id', (clone $query)->select('id'))->update(['response' => null]);
+
         $query->update([
+            'supplier_response' => null,
             'customer_email' => self::REDACTED_EMAIL,
             'shipping_address' => self::REDACTED,
             'recipient_name' => self::REDACTED,

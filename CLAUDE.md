@@ -107,10 +107,15 @@ paths drifting apart is the failure that class exists to prevent.
 implementing `App\Interfaces\PaymentGatewayInterface`. Stripe and PayPal each have a webhook
 controller.
 
-**A product names its supplier.** `products.supplier_id` (e.g. `printful`) sends an order's lines
-for that product to the supplier through `CheckoutService::supplierFor()` and
-`DispatchDropshippingOrder`, each line by its variant's `supplier_variant_id` or SKU, whatever the
-request names. `PrintfulCatalogImporter` mirrors a Printful store as products.
+**A product names its supplier.** `products.supplier_id` sends an order's lines for that product to
+the supplier, whatever the request names. `CheckoutService::suppliersFor()` and
+`assertFulfillable()` run before any charge; `Fulfilment\OrderFulfilments` writes one
+`order_fulfilments` row per supplier and `DispatchDropshippingOrder` submits it through a
+`FulfilmentProvider`. Never add a supplier branch to the core.
+
+**Modules are installed per deployment and activated per store.** `ModuleServiceProvider` is the only
+registrar; `StoreModules` holds each store's state. See
+[`docs/MODULE_ARCHITECTURE.md`](./docs/MODULE_ARCHITECTURE.md).
 
 **Order state is a transition, not an assignment.** `Order::transitionTo()` writes the history row;
 the `Order::STATUS_*` constants are the vocabulary. Never assign `status` directly.
@@ -124,7 +129,7 @@ whose views override the core's by path; `ProductPresenter` hands views prices a
 decided. See [`docs/THEMES.md`](./docs/THEMES.md).
 
 **Modules live in their own repositories** and are registered by `liberusoftware/module-manager`.
-`modules/` in this host holds the manager only.
+`modules/` holds what Composer installs; `packages/` holds packages not yet in their own repository.
 
 ## Documentation map
 

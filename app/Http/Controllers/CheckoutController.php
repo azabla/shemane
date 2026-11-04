@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class CheckoutController extends Controller
 {
@@ -144,7 +143,6 @@ class CheckoutController extends Controller
             'payment_method' => 'required|string',
             'recipient_name' => 'required_if:dropship,on|string',
             'recipient_email' => 'required_if:dropship,on|email',
-            'supplier_id' => ['nullable', 'string', Rule::in(array_keys(config('dropshipping.suppliers', [])))],
         ]);
 
         if ($validator->fails()) {
@@ -161,8 +159,8 @@ class CheckoutController extends Controller
         }
 
         // A supplier ships what its products say it ships, and it needs the address in parts.
-        $supplierId = $this->checkoutService->supplierFor($this->cart->items());
-        $missing = collect($supplierId !== null ? ['shipping_name' => 'full name', 'city' => 'city', 'postal_code' => 'postcode'] : [])
+        $suppliers = $this->checkoutService->suppliersFor($this->cart->items());
+        $missing = collect($suppliers !== [] ? ['shipping_name' => 'full name', 'city' => 'city', 'postal_code' => 'postcode'] : [])
             ->filter(fn ($label, $field) => blank($request->input($field)));
         if ($missing->isNotEmpty()) {
             return redirect()->back()->withInput()
@@ -184,6 +182,7 @@ class CheckoutController extends Controller
         }
 
         try {
+            $this->checkoutService->assertFulfillable($items);
             $this->checkoutService->assertCartPricesCurrent($items);
         } catch (CheckoutException $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());
@@ -306,7 +305,7 @@ class CheckoutController extends Controller
 
         $order = null;
         try {
-            DB::transaction(function () use (&$order, $lineItems, $request, $totalAmount, $shippingCost, $taxAmount, $taxLines, $discountAmount, $couponCode, $shippingCarrier, $shippingServiceName, $shippingQuoteId, $vatNumber, $reverseCharge) {
+            DB::transaction(function () use (&$order, $lineItems, $request, $totalAmount, $shippingCost, $taxAmount, $taxLines, $discountAmount, $couponCode, $shippingCarrier, $shippingServiceName, $shippingQuoteId, $vatNumber, $reverseCharge, $suppliers) {
                 // Close the coupon usage-limit race under a row lock before creating the order.
                 $this->checkoutService->assertCouponAvailable($couponCode);
 
@@ -335,7 +334,7 @@ class CheckoutController extends Controller
                     'discount_amount' => $discountAmount,
                     'coupon_code' => $couponCode,
                     'status' => 'pending',
-                    'is_dropshipped' => $request->has('dropship'),
+                    'is_dropshipped' => $suppliers !== [],
                     'recipient_name' => $request->recipient_name,
                     'recipient_email' => $request->recipient_email,
                     'gift_message' => $request->gift_message,
@@ -390,13 +389,10 @@ class CheckoutController extends Controller
         Notification::route('mail', $order->customer_email)
             ->notify(new OrderConfirmationNotification($order));
 
-        // If dropshipping, queue supplier order placement (shared with headless checkout).
-        $supplierId ??= $order->is_dropshipped ? $request->input('supplier_id', 'dropxl') : null;
-        if ($supplierId !== null) {
-            if (! $this->checkoutService->queueDropship($order, $supplierId)) {
-                return redirect()->route('checkout.confirmation', ['order' => $order->id])
-                    ->with('warning', 'Order placed but an error occurred while queuing the supplier order. Our team will follow up.');
-            }
+        // Queue supplier orders, from what the products say (shared with headless checkout).
+        if (! $this->checkoutService->queueFulfilment($order)) {
+            return redirect()->route('checkout.confirmation', ['order' => $order->id])
+                ->with('warning', 'Order placed but an error occurred while queuing the supplier order. Our team will follow up.');
         }
 
         // Issue download tokens for any downloadable lines.

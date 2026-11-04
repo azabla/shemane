@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Exceptions\CheckoutException;
 use App\Exceptions\InvalidProductConfigurationException;
 use App\Factories\PaymentGatewayFactory;
-use App\Jobs\DispatchDropshippingOrder;
 use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\Order;
@@ -13,6 +12,8 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Store;
 use App\Notifications\SupplierFailureNotification;
+use App\Services\Fulfilment\FulfilmentProviders;
+use App\Services\Fulfilment\OrderFulfilments;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -32,7 +33,7 @@ use Throwable;
  */
 class CheckoutService
 {
-    public function __construct(private CouponService $couponService, private ProductOptionResolver $resolver, private Inventory $inventory) {}
+    public function __construct(private CouponService $couponService, private ProductOptionResolver $resolver, private Inventory $inventory, private FulfilmentProviders $providers) {}
 
     /**
      * The order lines for a cart, as both checkout paths write them: the name,
@@ -236,43 +237,67 @@ class CheckoutService
     }
 
     /**
-     * The one supplier that fulfils the cart's physical lines, from the products themselves.
-     * Null when the merchant ships everything, or when lines would go to more than one supplier.
+     * The suppliers that fulfil these lines, from the products themselves and never the request.
      *
      * @param  iterable<object{product: ?Product}>  $items
+     * @return list<string>
      */
-    public function supplierFor(iterable $items): ?string
+    public function suppliersFor(iterable $items): array
     {
-        $suppliers = collect($items)->map(fn ($item) => $item->product)->filter()
+        return collect($items)->map(fn ($item) => $item->product)->filter()
             ->reject(fn (Product $product) => $product->is_downloadable)
-            ->pluck('supplier_id')->filter()->unique();
-
-        if ($suppliers->count() > 1) {
-            Log::warning('Cart spans suppliers '.$suppliers->implode(', ').'; not drop-shipped automatically.');
-        }
-
-        return $suppliers->count() === 1 ? $suppliers->first() : null;
+            ->pluck('supplier_id')->filter()->unique()->values()->all();
     }
 
     /**
-     * Queue supplier placement for a drop-shipped order. Returns true when queued;
-     * on failure it records SUPPLIER_FAILED + notifies staff and returns false (never
-     * throws — the order is already paid). Callers decide how to surface the outcome.
+     * Refuses before any charge when a line's supplier is not active for its store, because
+     * taking payment for an order nobody can send is the one outcome this must never allow.
+     *
+     * @param  iterable<object{product: ?Product}>  $items
+     *
+     * @throws CheckoutException
      */
+    public function assertFulfillable(iterable $items): void
+    {
+        foreach ($items as $item) {
+            $product = $item->product;
+
+            if ($product?->isDropshipped() && ! $product->is_downloadable && ! $this->providers->canFulfil($product->supplier_id, $product->store_id)) {
+                throw new CheckoutException("{$product->name} cannot be ordered right now.");
+            }
+        }
+    }
+
+    /**
+     * Queues the order with each supplier its products name. Returns false when that failed: the
+     * order is already paid, so this records it, notifies staff and never throws.
+     */
+    public function queueFulfilment(Order $order): bool
+    {
+        $suppliers = $this->suppliersFor($order->items()->with('product')->get());
+
+        return $suppliers === [] || $this->queueWith($order, $suppliers);
+    }
+
     public function queueDropship(Order $order, string $supplierId): bool
     {
+        return $this->queueWith($order, [$supplierId]);
+    }
+
+    /** @param  list<string>  $suppliers */
+    private function queueWith(Order $order, array $suppliers): bool
+    {
         try {
-            $order->update(['supplier_id' => $supplierId, 'is_dropshipped' => true]);
-            // Queued first: the job places only queued orders, and a sync queue runs it right here.
-            $order->transitionTo(Order::STATUS_SUPPLIER_QUEUED, notes: "Supplier order queued ({$supplierId})");
-            DispatchDropshippingOrder::dispatch($order->id, $supplierId);
+            app(OrderFulfilments::class)->queue($order, $suppliers);
 
             return true;
         } catch (Throwable $e) {
-            Log::error('Dropshipping dispatch error: '.$e->getMessage());
-            $order->transitionTo(Order::STATUS_SUPPLIER_FAILED, notes: 'Dropshipping dispatch error: '.$e->getMessage());
+            Log::error('Fulfilment dispatch error: '.$e->getMessage());
+            if ($order->status === Order::STATUS_PAID || $order->status === Order::STATUS_SUPPLIER_QUEUED) {
+                $order->transitionTo(Order::STATUS_SUPPLIER_FAILED, notes: 'Fulfilment dispatch error: '.$e->getMessage());
+            }
             Notification::route('mail', config('mail.from.address'))
-                ->notify(new SupplierFailureNotification("Error queuing dropshipping order for order {$order->id}: ".$e->getMessage()));
+                ->notify(new SupplierFailureNotification("Error queuing supplier order for order {$order->id}: ".$e->getMessage()));
 
             return false;
         }

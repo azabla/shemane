@@ -219,7 +219,7 @@ class GraphQLCheckoutTest extends TestCase
         $this->assertTrue($item->download_expires_at->isFuture());
     }
 
-    public function test_checkout_queues_a_dropship_order_with_recipient_details(): void
+    public function test_the_dropship_flag_keeps_the_recipient_and_cannot_route_the_order(): void
     {
         Queue::fake();
         Sanctum::actingAs($user = User::factory()->create());
@@ -231,10 +231,10 @@ class GraphQLCheckoutTest extends TestCase
         ]);
 
         $order = Order::first();
-        $this->assertTrue((bool) $order->is_dropshipped);
-        $this->assertSame('supplier_queued', $order->status);
+        $this->assertFalse((bool) $order->is_dropshipped);
+        $this->assertSame('paid', $order->status);
         $this->assertSame('Grandma', $order->recipient_name);
-        Queue::assertPushed(DispatchDropshippingOrder::class);
+        Queue::assertNotPushed(DispatchDropshippingOrder::class);
     }
 
     public function test_dropship_without_recipient_is_rejected(): void

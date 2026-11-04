@@ -2,8 +2,10 @@
 
 namespace App\Filament\Admin\Pages;
 
+use App\Integrations\Dropxl\DropxlDefinition;
 use App\Models\Store;
 use App\Services\DropxlService;
+use App\Support\Modules\StoreModules;
 use App\Support\StoreAccess;
 use App\Support\TeamPermission;
 use Filament\Actions\Action;
@@ -64,9 +66,27 @@ class DropxlImport extends Page
         return $this->storeId;
     }
 
-    public function mount(): void
+    public function updatedStoreId(): void
     {
         $this->loadCategories();
+    }
+
+    /** The chosen store's own DropXL account; null, with a notice, when it has none active. */
+    private function service(): ?DropxlService
+    {
+        $modules = app(StoreModules::class);
+
+        if ($this->targetStore() === null) {
+            return null;
+        }
+
+        if (! $modules->isActive(DropxlDefinition::KEY, $this->storeId)) {
+            Notification::make()->title('DropXL is not active for this store')->danger()->send();
+
+            return null;
+        }
+
+        return app(DropxlService::class)->forSettings($modules->settings(DropxlDefinition::KEY, $this->storeId));
     }
 
     /**
@@ -74,7 +94,12 @@ class DropxlImport extends Page
      */
     protected function loadCategories(): void
     {
-        $service = app(DropxlService::class);
+        $service = $this->service();
+
+        if ($service === null) {
+            return;
+        }
+
         $result = $service->getCategories();
 
         if ($result['success']) {
@@ -94,7 +119,12 @@ class DropxlImport extends Page
      */
     public function search(): void
     {
-        $service = app(DropxlService::class);
+        $service = $this->service();
+
+        if ($service === null) {
+            return;
+        }
+
         $result = $service->searchProducts(
             $this->keyword ?: null,
             $this->categoryId ?: null,
@@ -132,7 +162,12 @@ class DropxlImport extends Page
             return;
         }
 
-        $service = app(DropxlService::class);
+        $service = $this->service();
+
+        if ($service === null) {
+            return;
+        }
+
         $result = $service->importProduct($dropxlProduct, $storeId);
 
         if ($result['success']) {
@@ -159,7 +194,12 @@ class DropxlImport extends Page
             return;
         }
 
-        $service = app(DropxlService::class);
+        $service = $this->service();
+
+        if ($service === null) {
+            return;
+        }
+
         $result = $service->importAll($storeId, $this->keyword ?: null);
 
         if ($result['success']) {
@@ -192,7 +232,12 @@ class DropxlImport extends Page
             return;
         }
 
-        $service = app(DropxlService::class);
+        $service = $this->service();
+
+        if ($service === null) {
+            return;
+        }
+
         if (($storeId = $this->targetStore()) === null) {
             return;
         }

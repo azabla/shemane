@@ -4,6 +4,7 @@ namespace App\View\Storefront;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\Fulfilment\FulfilmentProviders;
 use App\Services\TaxCalculator;
 use App\Support\Money;
 use Illuminate\Support\Str;
@@ -14,13 +15,14 @@ use Illuminate\Support\Str;
  */
 class ProductPresenter
 {
-    public function __construct(private readonly TaxCalculator $tax) {}
+    public function __construct(private readonly TaxCalculator $tax, private readonly FulfilmentProviders $providers) {}
 
     /** @return array<string, mixed> */
     public function card(Product $product): array
     {
         $stock = (int) $product->inventory_count;
-        $isOut = ! $product->isInStock();
+        // A supplier product its store cannot send is sold out: checkout would refuse it, and themes need no change.
+        $isOut = ! $product->isInStock() || ($product->isDropshipped() && ! $this->providers->canFulfil($product->supplier_id, $product->store_id));
         $isLow = ! $isOut && $product->tracksInventory() && $stock <= (int) ($product->low_stock_threshold ?? 0);
 
         // Controllers eager-load these; the method calls are the fallback.

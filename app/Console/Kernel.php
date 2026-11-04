@@ -18,6 +18,8 @@ class Kernel extends ConsoleKernel
         // Meta applies its own review after upload, so local status goes stale
         // without a read-back.
         $schedule->command('facebook:reconcile-catalog')->hourly();
+
+        $schedule->command('fulfilment:sync-tracking')->hourly()->withoutOverlapping();
     }
 
     /**

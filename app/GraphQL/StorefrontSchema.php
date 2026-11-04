@@ -424,7 +424,7 @@ class StorefrontSchema
                 'couponCode' => Type::string(),       // re-validated against the live subtotal
                 'vatNumber' => Type::string(),        // EU VAT number → VIES-checked reverse charge
                 'dropship' => Type::boolean(),
-                'supplierId' => Type::string(),
+                'supplierId' => ['type' => Type::string(), 'deprecationReason' => 'Ignored. A product names its own supplier.'],
                 'recipientName' => Type::string(),
                 'recipientEmail' => Type::string(),
                 'giftMessage' => Type::string(),

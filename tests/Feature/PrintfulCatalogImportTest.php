@@ -2,16 +2,22 @@
 
 namespace Tests\Feature;
 
+use App\Integrations\Printful\PrintfulCatalog;
+use App\Integrations\Printful\PrintfulDefinition;
 use App\Models\Product;
-use App\Services\Printful\PrintfulCatalogImporter;
+use App\Models\Store;
+use App\Support\Modules\StoreModules;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
+use Tests\Feature\Concerns\ActivatesStoreModules;
 use Tests\Feature\Concerns\BuildsVariants;
 use Tests\TestCase;
 
 /** The Printful store becomes made-to-order products whose variants carry Printful's ids. */
 class PrintfulCatalogImportTest extends TestCase
 {
+    use ActivatesStoreModules;
     use BuildsVariants;
     use RefreshDatabase;
 
@@ -20,7 +26,7 @@ class PrintfulCatalogImportTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['dropshipping.suppliers.printful.auth.key' => 'Bearer pf_test']);
+        $this->activateModule(PrintfulDefinition::KEY, ['api_token' => 'pf_test']);
 
         $this->variants = [
             ['id' => 501, 'name' => 'Logo Hoodie / Black / M', 'sku' => 'HD-BLK-M', 'retail_price' => '45.00', 'files' => [['type' => 'preview', 'preview_url' => 'https://files.cdn.printful.com/black.png']]],
@@ -77,7 +83,7 @@ class PrintfulCatalogImportTest extends TestCase
         ], ['name' => 'Our hoodie', 'slug' => 'our-hoodie']);
         $kept = $this->variantOf($mine, 'Black / M');
 
-        app(PrintfulCatalogImporter::class)->importProduct(90, $mine);
+        app(ProductImporter::class)->import($mine->store_id, app(PrintfulCatalog::class)->product(90, ['api_token' => 'pf_test']), $mine->id);
 
         $mine = $mine->fresh();
         $this->assertSame(['Our hoodie', 'printful', 1], [$mine->name, $mine->supplier_id, Product::count()]);
@@ -87,7 +93,7 @@ class PrintfulCatalogImportTest extends TestCase
 
     public function test_names_without_the_product_still_give_colour_and_size_and_rules_file_the_product(): void
     {
-        config(['dropshipping.suppliers.printful.categories' => [
+        config(['printful.categories' => [
             'Headwear' => ['keywords' => ['cap', 'beanie']],
             'Apparel' => ['keywords' => ['hoodie', 'tee'], 'description' => 'Layers and staples.'],
         ]]);
@@ -100,9 +106,9 @@ class PrintfulCatalogImportTest extends TestCase
         $this->assertSame(['Apparel', 'Layers and staples.'], [$hoodie->category->name, $hoodie->category->description]);
     }
 
-    public function test_without_a_token_the_import_does_nothing(): void
+    public function test_without_printful_active_the_import_does_nothing(): void
     {
-        config(['dropshipping.suppliers.printful.auth.key' => 'Bearer ']);
+        app(StoreModules::class)->disable(PrintfulDefinition::KEY, Store::query()->orderBy('id')->firstOrFail()->id);
 
         $this->artisan('printful:import-products')->expectsOutputToContain('skipped')->assertSuccessful();
 

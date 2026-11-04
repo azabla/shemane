@@ -11,5 +11,7 @@ final readonly class FulfilmentRequest
         public Recipient $recipient,
         public array $lines,
         public ?string $giftMessage = null,
+        public ?string $shippingMethod = null,
+        public float $shippingCost = 0.0,
     ) {}
 }

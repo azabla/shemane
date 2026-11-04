@@ -2,37 +2,56 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Product;
-use App\Services\Printful\PrintfulCatalogImporter;
+use App\Integrations\Printful\PrintfulCatalog;
+use App\Integrations\Printful\PrintfulDefinition;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
+use Liberu\Ecommerce\Contracts\Modules\ModuleState;
+use Throwable;
 
 class ImportPrintfulProducts extends Command
 {
     protected $signature = 'printful:import-products
+                            {--store= : The store to import into; its Printful settings are used}
                             {--product= : One Printful sync product id, rather than the whole store}
                             {--onto= : Map that product onto this existing local product id}';
 
-    protected $description = 'Import the Printful store\'s sync products as made-to-order products with variants';
+    protected $description = 'Import a store\'s Printful sync products as made-to-order products with variants';
 
-    public function handle(PrintfulCatalogImporter $importer): int
+    public function handle(PrintfulCatalog $catalog, ProductImporter $importer, ModuleState $modules): int
     {
-        if (! $importer->isConfigured()) {
-            $this->info('Printful import skipped: PRINTFUL_API_TOKEN is not set.');
+        $storeId = (int) $this->option('store') ?: $modules->currentStoreId();
+
+        if ($storeId === null || ! $modules->isActive(PrintfulDefinition::KEY, $storeId)) {
+            $this->warn('Printful is not active for that store; import skipped. Name one with --store.');
 
             return self::SUCCESS;
         }
+
+        $settings = $modules->settings(PrintfulDefinition::KEY, $storeId);
 
         if ($id = $this->option('product')) {
-            $onto = $this->option('onto') ? Product::findOrFail($this->option('onto')) : null;
-            $product = $importer->importProduct($id, $onto);
-            $this->info("Imported {$product->name} with {$product->variants()->count()} variants.");
+            $product = $importer->import($storeId, $catalog->product($id, $settings), $this->option('onto') ? (int) $this->option('onto') : null);
+            $this->info("Imported as product {$product}.");
 
             return self::SUCCESS;
         }
 
-        $result = $importer->importAll();
-        $this->info("Printful import: {$result['imported']} imported, {$result['failed']} failed.");
+        $imported = $failed = 0;
 
-        return $result['failed'] === 0 ? self::SUCCESS : self::FAILURE;
+        foreach ($catalog->productIds($settings) as $id) {
+            try {
+                $importer->import($storeId, $catalog->product($id, $settings));
+                $imported++;
+            } catch (Throwable $e) {
+                Log::error('Printful product import failed', ['sync_product_id' => $id, 'exception' => $e]);
+                $failed++;
+            }
+        }
+
+        $this->info("Imported {$imported} products; {$failed} failed.");
+
+        return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 }
