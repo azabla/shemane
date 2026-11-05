@@ -10,7 +10,7 @@ How modules work in this platform, how to build one, and what is still open. Pat
 | 2. Per-store lifecycle | Done ([ADR 0015](./adr/0015-per-store-module-activation.md)) |
 | 3. Stable contracts | Done ([ADR 0016](./adr/0016-ecommerce-contracts-package.md)) |
 | 4. Printful and DropXL | Boundary done, Printful extracted to a package. DropXL stays built in (§10) |
-| 5. Distribution and CI | CI done. Publishing is **not** changed, and needs the maintainer's agreement (§11) |
+| 5. Distribution and CI | CI done. Application-side publishing removed ([ADR 0017](./adr/0017-packages-are-never-published-from-an-application.md)) |
 | 6. Themes | Done. See [`THEMES.md`](./THEMES.md) |
 
 Nothing here has been published or pushed. §12 lists what is open.
@@ -347,22 +347,13 @@ A new module's own repository keeps the three thin workflows in [`MODULE_DEVELOP
 | Site tests with `supplier_id => 'printful'` | Must activate the module in `setUp`, or checkout rightly refuses them |
 | Theme checkouts with a supplier `<select>` | Harmless, as the list is empty and the value is ignored, but worth removing |
 
-## 11. The package publisher
+## 11. No application publishes packages
 
-`.github/workflows/sync-packages.yml` copies `modules/*` and `themes/*` from a host into shared repositories, tags them and updates Packagist. It is unchanged, apart from the guard limiting it to `liberusoftware/ecommerce-laravel`, which `modules.yml` now protects.
+A package is maintained in its own repository, never synchronised from a consuming application ([ADR 0017](./adr/0017-packages-are-never-published-from-an-application.md)). Package repositories own their code, tests, versioning and releases; applications install compatible versions through Composer and may keep their own list of supported modules (`config/ecommerce-modules.php` here).
 
-**The problem.** It points the opposite way from independently maintained modules, and products overwrite each other. `module-users-roles` has sync commits from three products. `module-module-manager` took commits from five products on 2026-11-02, moving from `1.4.3` to `v1.6.2`, with `v` tags that skip the release gates that trigger only on bare tags ([ADR 0005](./adr/0005-bare-version-tags.md)). The GitHub API reports `main` unprotected on `module-users-roles`, `module-tenancy` and `module-module-manager`, so its review-PR path does not apply to them.
+The former `sync-packages.yml` copied a host's `modules/*` and `themes/*` into shared repositories, tagged them and updated Packagist. Every application ran a copy, so the last to sync decided what a shared package contained: `module-module-manager` took commits from five products on 2026-11-02 and moved from `1.4.3` to `v1.6.2`. It is removed from this repository on `chore/stop-package-publishing`, and `modules.yml` fails if any workflow here publishes packages again.
 
-**What this work did not change.** The publisher still exists, `modules/tenancy` and `modules/users-roles` are still tracked, and the merged publisher has still never run from this repository. The `packages/` directory is outside its paths, so it cannot publish the contracts or Printful. Nothing on this branch touches `modules/**`, so merging it will not trigger a run.
-
-**The recommended transition**, which needs the maintainer's agreement because other products share these repositories:
-
-1. Publish `ecommerce-contracts` and `ecommerce-printful` from their own repositories, on bare tags, with Packagist's GitHub hook.
-2. Pin `tenancy`, `users-roles` and `module-manager` to exact versions, and review each bump.
-3. Remove the tracked `modules/tenancy` and `modules/users-roles`, ignore `modules/*`, and drop their path repository. The image already takes installed modules from Composer, so the Dockerfile only loses its `COPY modules/users-roles` line.
-4. Remove `sync-packages.yml` from this repository only, and its script and README section. Other products keep theirs for as long as they choose.
-
-Consequences of doing so: edits to those two modules move to their own repositories, a clone no longer contains their source until `composer install`, and the fleet's `THEMES.md` §3.2 needs an ADR or an upstream change.
+Still to do here: remove the tracked `modules/tenancy` and `modules/users-roles`, ignore `modules/*`, and drop their path repository and the Dockerfile's `COPY modules/users-roles`. Publish `ecommerce-contracts` and `ecommerce-printful` from their own repositories, on bare tags.
 
 ## 12. Open decisions and limits
 
@@ -370,7 +361,6 @@ Consequences of doing so: edits to those two modules move to their own repositor
 
 | Decision | Recommendation | Who |
 | --- | --- | --- |
-| Does ecommerce leave host-to-package publishing? (§11) | Yes | Upstream maintainer |
 | Publish `ecommerce-contracts` and `ecommerce-printful`, and public or private? | Public on Packagist | You, with the maintainer |
 | One package per integration, against the fleet's four ([ADR 0016](./adr/0016-ecommerce-contracts-package.md)) | One. Needs a catalogue entry in `ECOMMERCE.md` for both packages | Upstream maintainer |
 | Do the wave `module-ecommerce-*` packages stay the plan? | Pause them. They have their own data model, and `module-ecommerce-dropshipping`'s manifest is invalid | Upstream maintainer |
@@ -402,4 +392,4 @@ Kept briefly, because it explains the design. The first assessment is in this fi
 | An outage was recorded as a supplier's rejection, so the job's retry could not happen | Fixed |
 | Nothing wrote tracking | `fulfilment:sync-tracking` |
 | `dropship_*` wave tables and `App\Modules` were attempts that never connected to a running host | Neither is in use. See ADR 0011 and §12 |
-| The publisher ran in private site repositories, and could have published from them | Guarded; sites get this on their next merge |
+| The publisher ran in every application, and could overwrite any shared package | Removed ([ADR 0017](./adr/0017-packages-are-never-published-from-an-application.md)) |

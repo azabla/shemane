@@ -59,7 +59,7 @@ Names are lowercase letters, digits and hyphens, and `name` must match the direc
 | `composer.json` | **None** | `type: liberu-theme`, `extra.liberu.name` matching the directory |
 | In Git | Yes | No: add `/themes/<name>/` to `.gitignore` |
 
-A tracked theme must not have a `composer.json`, because the `sync-packages` workflow publishes any tracked one as a public package. CI enforces this.
+A tracked theme has no `composer.json`: a distributable theme is maintained, versioned and released in its own repository, never published from an application ([ADR 0017](./adr/0017-packages-are-never-published-from-an-application.md)). CI enforces this.
 
 To install a distributed theme, run `composer require vendor/theme-name`, add its directory to `.gitignore`, and rebuild the frontend: `vite.config.js` reads every `theme.json` in `themes/` for its entry points. Then choose it on the channel in **Stores → Channels**. The image carries Composer-installed themes into both its asset and final stages.
 
