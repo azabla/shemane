@@ -99,5 +99,7 @@ class AppServiceProvider extends ServiceProvider
 
             return $team !== null && StoreAccess::allows($user, TeamPermission::STORE_MANAGE, $team);
         });
+
+        Gate::define('viewModuleDiagnostics', fn (User $user) => StoreAccess::platform($user, 'manage_modules'));
     }
 }

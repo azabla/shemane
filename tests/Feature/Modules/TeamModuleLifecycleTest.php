@@ -498,6 +498,15 @@ class TeamModuleLifecycleTest extends TestCase
         $this->assertNull(app(ModuleState::class)->currentTeamId());
     }
 
+    public function test_module_diagnostics_are_for_the_platform_only(): void
+    {
+        $this->platformAdmin();
+        $this->assertTrue(Gate::allows('viewModuleDiagnostics'));
+
+        $this->merchant();
+        $this->assertFalse(Gate::allows('viewModuleDiagnostics'));
+    }
+
     private function assertRefused(callable $action): void
     {
         try {
