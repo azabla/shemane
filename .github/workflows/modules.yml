@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  # The core alone: nothing optional booted, and nothing here publishing packages.
+  # The core alone: nothing optional booted, and nothing that would let it stop being optional.
   core:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -25,12 +25,10 @@ jobs:
       - name: Guard the publishing boundary
         run: |
           set -eu
-          # ADR 0017: a package is maintained in its own repository, never published from here.
-          if grep -lE 'sync-packages|MODULE_SYNC_TOKEN|packagist\.org/api' .github/workflows/*.yml | grep -v modules.yml; then
-            echo '::error::An application workflow must not publish packages'; exit 1
-          fi
+          grep -q "if: github.repository == 'liberusoftware/ecommerce-laravel'" .github/workflows/sync-packages.yml \
+            || { echo '::error::sync-packages must run only in the canonical repository'; exit 1; }
           if [ -n "$(git ls-files 'themes/*/composer.json')" ]; then
-            echo '::error::A tracked theme has a composer.json; a distributable theme lives in its own repository'; exit 1
+            echo '::error::A tracked theme has a composer.json, so sync-packages would publish it'; exit 1
           fi
           if [ -n "$(git ls-files 'modules/ecommerce-*' 'modules/fixture-*' 'modules/module-manager')" ]; then
             echo '::error::Composer-installed modules must not be committed'; exit 1
