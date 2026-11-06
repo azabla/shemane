@@ -25,7 +25,7 @@
         "liberusoftware/composer-installer": "^1.1",
         "liberusoftware/ecommerce-contracts": "^1.0",
         "liberusoftware/module-manager": "^1.4.3",
-        "liberusoftware/tenancy": "^1.0",
+        "liberusoftware/tenancy": "^1.0.1",
         "liberusoftware/users-roles": "^1.0",
         "livewire/livewire": "^4.4.8",
         "orangehill/iseed": "^3.8.1",
