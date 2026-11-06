@@ -2,16 +2,16 @@
 
 namespace App\Filament;
 
-use App\Support\Modules\ModuleInventory;
-use App\Support\Modules\StoreModules;
+use App\Support\Modules\TeamModules;
 use Filament\Contracts\Plugin;
 use Liberu\Ecommerce\Contracts\Modules\ProvidesPanelPlugins;
+use Liberu\Foundation\ModuleManager\ModuleInventory;
 use RuntimeException;
 
 /** The plugins booted modules add to a panel: from their manifest, or from their definition. */
 final readonly class ModulePlugins
 {
-    public function __construct(private ModuleInventory $inventory, private StoreModules $modules) {}
+    public function __construct(private ModuleInventory $inventory, private TeamModules $modules) {}
 
     /** @return list<Plugin> */
     public function forPanel(string $panel): array

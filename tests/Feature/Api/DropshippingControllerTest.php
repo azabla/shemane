@@ -8,12 +8,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Role;
-use Tests\Feature\Concerns\ActivatesStoreModules;
+use Tests\Feature\Concerns\ActivatesModules;
 use Tests\TestCase;
 
 class DropshippingControllerTest extends TestCase
 {
-    use ActivatesStoreModules;
+    use ActivatesModules;
     use RefreshDatabase;
 
     protected $user;

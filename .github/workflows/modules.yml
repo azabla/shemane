@@ -39,7 +39,7 @@ jobs:
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: php artisan key:generate
       - name: Installed manifests are valid
-        run: php artisan module:validate
+        run: php artisan module:validate --strict
       - name: Themes are valid
         run: php artisan theme:validate
       - name: Nothing optional boots by default
@@ -136,4 +136,4 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: docker build -t liberu/ecommerce:modules-check .
       - name: Required modules are in the image and valid
-        run: docker run --rm --entrypoint php liberu/ecommerce:modules-check /var/www/html/artisan module:validate
+        run: docker run --rm --entrypoint php liberu/ecommerce:modules-check /var/www/html/artisan module:validate --strict

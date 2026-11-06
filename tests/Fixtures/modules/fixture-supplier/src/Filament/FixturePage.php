@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Liberu\Ecommerce\Contracts\Modules\Abilities;
 use Liberu\Ecommerce\Contracts\Modules\ModuleState;
 
-/** A module's own admin page, gated on the store having it and the person being allowed. */
+/** A module's own admin page, gated on the team having it and the person being allowed. */
 class FixturePage extends Page
 {
     protected static ?string $slug = 'fixture-supplier';
@@ -17,9 +17,9 @@ class FixturePage extends Page
     public static function canAccess(): bool
     {
         $state = app(ModuleState::class);
-        $storeId = $state->currentStoreId();
+        $teamId = $state->currentTeamId();
 
-        return $storeId !== null && $state->isActive('fixture-supplier', $storeId) && Gate::allows(Abilities::MANAGE_STORE, $storeId);
+        return $teamId !== null && $state->isActiveForTeam('fixture-supplier', $teamId) && Gate::allows(Abilities::MANAGE_MODULES, $teamId);
     }
 
     public function content(Schema $schema): Schema

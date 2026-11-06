@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Store;
 use App\Services\Fulfilment\FulfilmentProviders;
-use App\Support\Modules\StoreModules;
+use App\Support\Modules\TeamModules;
 use App\Support\StoreAccess;
 use App\Support\TeamPermission;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +22,7 @@ use Liberu\Ecommerce\Contracts\Fulfilment\SupplierUnavailable;
 /** Staff access to the suppliers the request's store has active, on that store's own credentials. */
 class DropshippingController extends Controller
 {
-    public function __construct(private readonly FulfilmentProviders $providers, private readonly StoreModules $modules) {}
+    public function __construct(private readonly FulfilmentProviders $providers, private readonly TeamModules $modules) {}
 
     public function suppliers(Request $request): JsonResponse
     {

@@ -15,7 +15,6 @@ use App\Models\Store;
 use App\Models\User;
 use App\Services\Fulfilment\OrderFulfilments;
 use App\Services\PaymentGateways\StripeGateway;
-use App\Support\Modules\StoreModules;
 use App\View\Storefront\ProductPresenter;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,7 +26,7 @@ use Laravel\Sanctum\Sanctum;
 use Liberu\Ecommerce\FixtureSupplier\FixtureFulfilment;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
-use Tests\Feature\Concerns\ActivatesStoreModules;
+use Tests\Feature\Concerns\ActivatesModules;
 use Tests\Feature\Concerns\BuildsVariants;
 use Tests\Feature\Modules\Concerns\InstallsFixtureModules;
 use Tests\TestCase;
@@ -35,7 +34,7 @@ use Tests\TestCase;
 /** A product names its supplier, and the order goes there; never where the request says. */
 class SupplierFulfilmentTest extends TestCase
 {
-    use ActivatesStoreModules;
+    use ActivatesModules;
     use BuildsVariants;
     use InstallsFixtureModules;
     use RefreshDatabase;
@@ -196,7 +195,7 @@ class SupplierFulfilmentTest extends TestCase
     {
         Queue::fake();
         $this->addToCart('M');
-        app(StoreModules::class)->disable('fixture-supplier', $this->store->id);
+        $this->deactivateModule('fixture-supplier', $this->store->id);
 
         $this->checkout()->assertSessionHas('error');
 
@@ -209,7 +208,7 @@ class SupplierFulfilmentTest extends TestCase
     {
         Sanctum::actingAs($user = User::factory()->create());
         CartItem::create(['user_id' => $user->id, 'product_id' => $this->tee->id, 'product_variant_id' => $this->variantOf($this->tee, 'M')->id, 'quantity' => 1, 'price' => 25, 'session_id' => 'api']);
-        app(StoreModules::class)->disable('fixture-supplier', $this->store->id);
+        $this->deactivateModule('fixture-supplier', $this->store->id);
 
         $response = $this->postJson('/api/graphql', ['query' => 'mutation($input: CheckoutInput!) { checkout(input: $input) { id } }', 'variables' => ['input' => [
             'country' => 'GB', 'paymentMethod' => 'stripe', 'stripeToken' => 'tok', 'shippingAddress' => '1 High Street', 'city' => 'Leeds', 'postalCode' => 'LS1 1AA',
@@ -224,7 +223,7 @@ class SupplierFulfilmentTest extends TestCase
     {
         $this->assertNotSame('out', app(ProductPresenter::class)->card($this->tee)['stock_state']);
 
-        app(StoreModules::class)->disable('fixture-supplier', $this->store->id);
+        $this->deactivateModule('fixture-supplier', $this->store->id);
         app()->forgetScopedInstances();
 
         $this->assertSame('out', app(ProductPresenter::class)->card($this->tee)['stock_state']);

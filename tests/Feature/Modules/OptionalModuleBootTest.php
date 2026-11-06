@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Modules;
 
-use App\Support\Modules\ModuleInventory;
+use Liberu\Foundation\ModuleManager\ModuleInventory;
 use Tests\Feature\Modules\Concerns\InstallsFixtureModules;
 use Tests\TestCase;
 

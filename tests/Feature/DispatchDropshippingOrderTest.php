@@ -7,7 +7,6 @@ use App\Models\Order;
 use App\Models\OrderFulfilment;
 use App\Models\Product;
 use App\Services\Fulfilment\OrderFulfilments;
-use App\Support\Modules\StoreModules;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
@@ -15,13 +14,13 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Liberu\Ecommerce\Contracts\Fulfilment\SupplierUnavailable;
 use RuntimeException;
-use Tests\Feature\Concerns\ActivatesStoreModules;
+use Tests\Feature\Concerns\ActivatesModules;
 use Tests\Feature\Modules\Concerns\InstallsFixtureModules;
 use Tests\TestCase;
 
 class DispatchDropshippingOrderTest extends TestCase
 {
-    use ActivatesStoreModules;
+    use ActivatesModules;
     use InstallsFixtureModules;
     use RefreshDatabase;
 
@@ -171,7 +170,7 @@ class DispatchDropshippingOrderTest extends TestCase
     {
         Http::fake();
         $order = $this->queuedOrder();
-        app(StoreModules::class)->disable('fixture-supplier', $order->store_id);
+        $this->deactivateModule('fixture-supplier', $order->store_id);
 
         $this->runJob($order);
 

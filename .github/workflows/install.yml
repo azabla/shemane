@@ -68,7 +68,7 @@ jobs:
       run: php artisan key:generate
 
     - name: Validate installed modules
-      run: php artisan module:validate
+      run: php artisan module:validate --strict
 
     - name: Wait for MySQL
       run: |

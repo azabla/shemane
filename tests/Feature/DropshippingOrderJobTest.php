@@ -11,13 +11,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
-use Tests\Feature\Concerns\ActivatesStoreModules;
+use Tests\Feature\Concerns\ActivatesModules;
 use Tests\TestCase;
 
 /** The built-in DropXL integration, through the same boundary a package uses. */
 class DropshippingOrderJobTest extends TestCase
 {
-    use ActivatesStoreModules;
+    use ActivatesModules;
     use RefreshDatabase;
 
     protected function setUp(): void

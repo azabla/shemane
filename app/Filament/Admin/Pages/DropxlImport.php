@@ -5,7 +5,7 @@ namespace App\Filament\Admin\Pages;
 use App\Integrations\Dropxl\DropxlDefinition;
 use App\Models\Store;
 use App\Services\DropxlService;
-use App\Support\Modules\StoreModules;
+use App\Support\Modules\TeamModules;
 use App\Support\StoreAccess;
 use App\Support\TeamPermission;
 use Filament\Actions\Action;
@@ -74,7 +74,7 @@ class DropxlImport extends Page
     /** The chosen store's own DropXL account; null, with a notice, when it has none active. */
     private function service(): ?DropxlService
     {
-        $modules = app(StoreModules::class);
+        $modules = app(TeamModules::class);
 
         if ($this->targetStore() === null) {
             return null;

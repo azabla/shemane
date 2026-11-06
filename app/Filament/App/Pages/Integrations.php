@@ -2,9 +2,11 @@
 
 namespace App\Filament\App\Pages;
 
-use App\Models\Store;
+use App\Models\Team;
 use App\Support\Modules\ModuleActivationRefused;
-use App\Support\Modules\StoreModules;
+use App\Support\Modules\TeamModules;
+use App\Support\StoreAccess;
+use App\Support\TeamPermission;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Field;
@@ -20,14 +22,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Liberu\Ecommerce\Contracts\Modules\ProvidesConfigurationPage;
 use Liberu\Ecommerce\Contracts\Modules\SettingField;
-use Livewire\Attributes\Url;
 
-/** Where a merchant turns on and configures the modules the platform made available to their store. */
+/** Where a team turns on and configures the modules the platform offers. Every store of the team inherits them. */
 class Integrations extends Page implements HasTable
 {
     use InteractsWithTable;
@@ -36,32 +35,21 @@ class Integrations extends Page implements HasTable
 
     protected static ?int $navigationSort = 13;
 
-    /** Which of the team's stores, when it has several. */
-    #[Url]
-    public ?int $store = null;
-
     public static function canAccess(): bool
     {
-        $user = auth()->user();
+        $team = Filament::getTenant();
 
-        return $user !== null && static::stores()->contains(fn (Store $store) => Gate::forUser($user)->allows('manageSettings', $store));
+        return $team instanceof Team && StoreAccess::allows(auth()->user(), TeamPermission::STORE_MANAGE, $team);
     }
 
-    /** @return Collection<int, Store> */
-    public static function stores(): Collection
+    public function team(): Team
     {
-        return Store::query()->where('team_id', Filament::getTenant()?->getKey())->orderBy('name')->get();
-    }
+        $team = Filament::getTenant();
 
-    public function record(): Store
-    {
-        $stores = static::stores();
-        $record = $stores->firstWhere('id', $this->store) ?? $stores->first();
+        abort_unless($team instanceof Team, 404);
+        StoreAccess::authorize(auth()->user(), TeamPermission::STORE_MANAGE, $team);
 
-        abort_if($record === null, 404);
-        Gate::authorize('manageSettings', $record);
-
-        return $record;
+        return $team;
     }
 
     public function content(Schema $schema): Schema
@@ -71,19 +59,19 @@ class Integrations extends Page implements HasTable
 
     public function table(Table $table): Table
     {
-        $modules = app(StoreModules::class);
+        $modules = app(TeamModules::class);
 
         return $table
             ->records(function () use ($modules): array {
-                $store = $this->record();
+                $team = $this->team();
                 $rows = [];
 
-                foreach ($modules->availableTo($store->id) as $key => $definition) {
+                foreach ($modules->available() as $key => $definition) {
                     $rows[$key] = [
                         'key' => $key,
                         'label' => $definition->label(),
                         'description' => $definition->description(),
-                        'status' => $modules->status($key, $store->id),
+                        'status' => $modules->status($key, $team->id),
                     ];
                 }
 
@@ -98,21 +86,21 @@ class Integrations extends Page implements HasTable
                     default => 'Off',
                 })->color(fn (string $state) => $state === 'active' ? 'success' : ($state === 'unconfigured' ? 'warning' : 'gray')),
             ])
-            ->emptyStateHeading('No modules are available to this store')
-            ->emptyStateDescription('The platform administrator decides which installed modules each store can use.')
+            ->emptyStateHeading('No modules are available to your team')
+            ->emptyStateDescription('The platform administrator decides which installed modules teams can use. What your team turns on applies to all of its stores.')
             ->recordActions([
                 Action::make('configure')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->url(function (array $record) use ($modules) {
                         $definition = $modules->definition($record['key']);
 
-                        return $definition instanceof ProvidesConfigurationPage ? $definition->configurationUrl($this->record()->id) : null;
+                        return $definition instanceof ProvidesConfigurationPage ? $definition->configurationUrl($this->team()->id) : null;
                     })
-                    ->fillForm(fn (array $record) => $modules->displayableSettings($record['key'], $this->record()->id))
+                    ->fillForm(fn (array $record) => $modules->displayableSettings($record['key'], $this->team()->id))
                     ->schema(fn (array $record) => $this->fields($record['key']))
                     ->action(function (array $record, array $data, Action $action) use ($modules) {
                         try {
-                            $modules->configure($record['key'], $this->record()->id, $data);
+                            $modules->configure($record['key'], $this->team()->id, $data);
                         } catch (ValidationException|ModuleActivationRefused $e) {
                             Notification::make()->title($e->getMessage())->danger()->send();
                             $action->halt();
@@ -125,7 +113,7 @@ class Integrations extends Page implements HasTable
                     ->visible(fn (array $record) => $record['status'] === 'available')
                     ->action(function (array $record) use ($modules) {
                         try {
-                            $modules->enable($record['key'], $this->record()->id);
+                            $modules->enable($record['key'], $this->team()->id);
                             Notification::make()->title('Module enabled')->success()->send();
                         } catch (ModuleActivationRefused $e) {
                             Notification::make()->title($e->getMessage())->danger()->send();
@@ -136,7 +124,7 @@ class Integrations extends Page implements HasTable
                     ->requiresConfirmation()
                     ->visible(fn (array $record) => in_array($record['status'], ['active', 'unconfigured'], true))
                     ->action(function (array $record) use ($modules) {
-                        $modules->disable($record['key'], $this->record()->id);
+                        $modules->disable($record['key'], $this->team()->id);
                         Notification::make()->title('Module disabled')->success()->send();
                     }),
             ]);
@@ -145,13 +133,13 @@ class Integrations extends Page implements HasTable
     /** @return list<Component|Field> */
     private function fields(string $module): array
     {
-        $modules = app(StoreModules::class);
+        $modules = app(TeamModules::class);
         $definition = $modules->definition($module);
-        $storeId = $this->record()->id;
+        $teamId = $this->team()->id;
         $rules = $definition === null ? [] : $modules->rules($definition);
 
-        return array_map(function (SettingField $field) use ($modules, $module, $storeId, $rules) {
-            $stored = $modules->hasStoredValue($module, $storeId, $field->key);
+        return array_map(function (SettingField $field) use ($modules, $module, $teamId, $rules) {
+            $stored = $modules->hasStoredValue($module, $teamId, $field->key);
 
             $input = match ($field->type) {
                 SettingField::BOOLEAN => Toggle::make($field->key),

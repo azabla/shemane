@@ -13,6 +13,7 @@ use App\Providers\ModuleServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
+use Liberu\Foundation\ModuleManager\ModuleManagerServiceProvider;
 
 return [
 
@@ -177,6 +178,7 @@ return [
          */
         // First, so a module's bindings exist before the panels and the app are configured.
         ModuleServiceProvider::class,
+        ModuleManagerServiceProvider::class,
         AppServiceProvider::class,
         AuthServiceProvider::class,
         BroadcastServiceProvider::class,

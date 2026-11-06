@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\Store;
+use App\Models\Team;
 use App\Models\User;
 use App\Support\StoreAccess;
 use App\Support\StorefrontTheme;
@@ -92,5 +93,13 @@ class AppServiceProvider extends ServiceProvider
                 return $store !== null && StoreAccess::allows($user, $permission, $store, $platform);
             });
         }
+
+        Gate::define(Abilities::MANAGE_MODULES, function (User $user, int $teamId) {
+            $team = Team::find($teamId);
+
+            return $team !== null && StoreAccess::allows($user, TeamPermission::STORE_MANAGE, $team);
+        });
+
+        Gate::define('viewModuleDiagnostics', fn (User $user) => StoreAccess::platform($user, 'manage_modules'));
     }
 }

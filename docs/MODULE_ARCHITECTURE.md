@@ -6,8 +6,8 @@ How modules work in this platform, how to build one, and what is still open. Pat
 
 | Phase | State |
 | --- | --- |
-| 1. Make the module manager real | Done ([ADR 0014](./adr/0014-host-module-registration.md)) |
-| 2. Per-store lifecycle | Done ([ADR 0015](./adr/0015-per-store-module-activation.md)) |
+| 1. Make the module manager real | Done ([ADR 0014](./adr/0014-host-module-registration.md), then the manager's own provider from 1.7.0, [ADR 0018](./adr/0018-the-managers-provider-registers-modules.md)) |
+| 2. Activation lifecycle | Done per store ([ADR 0015](./adr/0015-per-store-module-activation.md)), then per team ([ADR 0019](./adr/0019-team-module-activation.md)) |
 | 3. Stable contracts | Done ([ADR 0016](./adr/0016-ecommerce-contracts-package.md)) |
 | 4. Printful and DropXL | Boundary done, Printful extracted to a package. DropXL stays built in (§10) |
 | 5. Distribution and CI | CI done. Application-side publishing removed ([ADR 0017](./adr/0017-packages-are-never-published-from-an-application.md)) |
@@ -21,9 +21,9 @@ Nothing here has been published or pushed. §12 lists what is open.
 | --- | --- | --- |
 | Maintainers | Catalogue what is supported | `config/ecommerce-modules.php` |
 | Deployment operator | Install with Composer, and enable | `composer.lock`, `MODULES_ENABLED` |
-| The core | Discover, validate, register, gate | `ModuleServiceProvider`, `ModuleLoader` |
-| Platform admin | Make a module available to stores | `store_modules.available`, on **Settings → Modules** |
-| Merchant | Enable and configure it for their store | `store_modules.enabled` and `settings`, on **Integrations** |
+| The core | Gate each store by its team; the manager discovers, validates and registers | `ModuleServiceProvider`, `ModuleManagerServiceProvider` |
+| Platform admin | Offer a module to teams; see what loaded and why not | `module_availability`, on **Settings → Module availability**; **Operations → Foundation Operations** from `module-manager-filament` |
+| Team | Enable and configure it; every store of the team inherits it | `team_modules.enabled` and `settings`, on **Integrations** |
 | Existing authorization | Decide who may do any of this | `StoreAccess`, Gate abilities |
 
 The lifecycle, in order:
@@ -56,7 +56,7 @@ Everything else is optional. An optional module that fails is left out, logged a
 
 ## 3. Registration
 
-`App\Providers\ModuleServiceProvider` is the only path by which a module's provider is registered. It uses the manager's `Manifest`, `ModuleRegistry`, `ModuleValidator` and `RegistryCache` per module, rather than the manager's own provider, which stops at the first error. ADR 0014 has the reasoning.
+The manager's `ModuleManagerServiceProvider` is the only path by which a module's provider is registered, with `modules.isolate_failures` on so that it loads one module at a time. `App\Providers\ModuleServiceProvider` registers what is the host's: team activation and the contracts modules plug into. ADR 0018 has the reasoning.
 
 A module boots when it is required, or its manifest sets `default_enabled`, or `MODULES_ENABLED` names it. `MODULES_DISABLED` overrides the last two.
 
@@ -69,7 +69,7 @@ php artisan module:clear
 php artisan module:features
 ```
 
-Root `composer.json` lists `tenancy` and `users-roles` under `extra.laravel.dont-discover`, because both packages declare `extra.laravel.providers`. `module:validate` fails on any module that Laravel's package discovery would still register.
+Root `composer.json` lists `tenancy` and `users-roles` under `extra.laravel.dont-discover`, because both packages declare `extra.laravel.providers`. `module:validate --strict`, which CI and the image build run, fails on any module that Laravel's package discovery would still register.
 
 A provider that throws in `register()` is isolated. One that throws in `boot()` is not, because Laravel offers no hook for it. The composition test in §9 catches that before a release.
 
@@ -182,23 +182,28 @@ class AcmeDefinition implements ModuleDefinition
 }
 ```
 
-The core stores settings encrypted per store, keeps only declared fields, never redisplays a secret, and treats a blank secret as "keep the current one". Rotating `APP_KEY` needs `APP_PREVIOUS_KEYS`, or stored settings cannot be read.
+The core stores settings encrypted per team, keeps only declared fields, never redisplays a secret, and treats a blank secret as "keep the current one". Rotating `APP_KEY` needs `APP_PREVIOUS_KEYS`, or stored settings cannot be read.
 
 Reading state, by injecting `ModuleState`:
 
 ```php
 $state->isActive('ecommerce-acme', $storeId);   // null means the current request's store
 $state->settings('ecommerce-acme', $storeId);   // throws ModuleNotActive for a store without it
+
+$state->isActiveForTeam('ecommerce-acme', $teamId);
+$state->teamSettings('ecommerce-acme', $teamId); // the same settings every store of the team reads
 ```
 
-Under the hood this is `App\Support\Modules\StoreModules`. It is scoped, and every read names a store, so nothing crosses requests or jobs under Octane or Horizon.
+`currentStoreId()` is null in the panel of a team with several stores; the core never picks one. `currentTeamId()` is the storefront's team or the panel's team, and null on the platform. Work that writes store rows, such as importing products, names its store explicitly.
+
+Under the hood this is `App\Support\Modules\TeamModules`. It is scoped, and resolves each store to its team, so nothing crosses requests or jobs under Octane or Horizon.
 
 Optional interfaces on the definition:
 
 | Interface | For |
 | --- | --- |
 | `ProvidesPanelPlugins` | Adding Filament plugins to `admin` or `app` |
-| `ProvidesConfigurationPage` | Configuring on the module's own page instead of the generated form |
+| `ProvidesConfigurationPage` | Configuring on the module's own page instead of the generated form. `configurationUrl()` takes the team id |
 | `ReactsToActivation` | Running something when a store turns it on or off |
 
 ### Filament
@@ -211,15 +216,15 @@ A module's pages are registered for the whole deployment, so each one must gate 
 public static function canAccess(): bool
 {
     $state = app(ModuleState::class);
-    $storeId = $state->currentStoreId();
+    $teamId = $state->currentTeamId();
 
-    return $storeId !== null
-        && $state->isActive('ecommerce-acme', $storeId)
-        && Gate::allows(Abilities::MANAGE_STORE, $storeId);
+    return $teamId !== null
+        && $state->isActiveForTeam('ecommerce-acme', $teamId)
+        && Gate::allows(Abilities::MANAGE_MODULES, $teamId);
 }
 ```
 
-Modules ask `Abilities::MANAGE_STORE`, `MANAGE_CATALOGUE` or `MANAGE_ORDERS`, each taking a store id, and never name a role. `strictAuthorization()` makes a module model with no policy fail loudly.
+Modules ask `Abilities::MANAGE_MODULES`, taking a team id, or `MANAGE_STORE`, `MANAGE_CATALOGUE` or `MANAGE_ORDERS`, each taking a store id, and never name a role. `strictAuthorization()` makes a module model with no policy fail loudly.
 
 ### Routes
 
@@ -281,7 +286,7 @@ The flow:
 1. `composer require liberusoftware/ecommerce-acme`, and commit the lock file.
 2. Add it to `MODULES_ENABLED`.
 3. Merge, let CI pass, build and deploy. The deploy runs its migrations.
-4. On **Settings → Modules**, choose the stores. Each merchant then configures and enables it on **Integrations**.
+4. On **Settings → Module availability**, offer it. Each team then configures and enables it on **Integrations**.
 
 To develop locally against an unpublished module, add a temporary path repository with `composer config repositories.acme path ../module-ecommerce-acme`, and do not commit it.
 
@@ -294,9 +299,9 @@ To develop locally against an unpublished module, add a temporary path repositor
 
 These are separate steps on purpose, and the data stays unless you choose step 3.
 
-1. Merchants disable it. The Modules page shows which stores are allowed.
+1. Withdraw it on **Settings → Module availability**, which turns it off for every team. The page shows how many teams use it.
 2. Remove it from `MODULES_ENABLED` and deploy. The code is present and does not boot.
-3. Optional and destructive, while the files still exist: `php artisan migrate:reset --path=modules/<name>/database/migrations`, and delete its `store_modules` rows.
+3. Optional and destructive, while the files still exist: `php artisan migrate:reset --path=modules/<name>/database/migrations`, and delete its `team_modules` and `module_availability` rows.
 4. `composer remove`, and deploy.
 
 ## 8. Why the admin panel does not run Composer
@@ -333,14 +338,14 @@ A new module's own repository keeps the three thin workflows in [`MODULE_DEVELOP
 
 **Printful** is `packages/ecommerce-printful`, a complete `liberu-module` package requiring only the contracts. `jmhclothing` and `coldphysique` use it. It is a path repository because publishing needs approval; to split it, move the directory to its own repository unchanged and replace the path repository with a version.
 
-**DropXL stays built in**, at `app/Integrations/Dropxl`, activated per store through the same contracts. In the site repositories, only tests inherited from the core mention it, and no site's themes or seeders do, and nothing confirms its API URL is real. Extracting it would prove nothing. Decide whether to keep it once someone needs it.
+**DropXL stays built in**, at `app/Integrations/Dropxl`, activated per team through the same contracts. In the site repositories, only tests inherited from the core mention it, and no site's themes or seeders do, and nothing confirms its API URL is real. Extracting it would prove nothing. Decide whether to keep it once someone needs it.
 
 **What changes when a site merges this.** The sites are not modified by this work. On their next merge from the core:
 
 | Change | What the site must do |
 | --- | --- |
 | New `tenancy`, contracts and `dont-discover` entries | Resolve `composer.lock` by re-running Composer |
-| Supplier credentials leave `.env` | Enter them per store on **Integrations**. `PRINTFUL_API_TOKEN` and `DROPXL_API_KEY` are no longer used |
+| Supplier credentials leave `.env` | Enter them per team on **Integrations**. `PRINTFUL_API_TOKEN` and `DROPXL_API_KEY` are no longer used |
 | A site using Printful | `composer require liberusoftware/ecommerce-printful`, add `ecommerce-printful` to `MODULES_ENABLED`, then allow and enable it. **Until then its products show as sold out** |
 | `printful:import-products` | Now needs `--store=<id>` on a multi-store deployment |
 | `dropshipping.suppliers.printful.categories` | Moves to `printful.categories` |
@@ -364,7 +369,7 @@ Still to do here: remove the tracked `modules/tenancy` and `modules/users-roles`
 | Publish `ecommerce-contracts` and `ecommerce-printful`, and public or private? | Public on Packagist | You, with the maintainer |
 | One package per integration, against the fleet's four ([ADR 0016](./adr/0016-ecommerce-contracts-package.md)) | One. Needs a catalogue entry in `ECOMMERCE.md` for both packages | Upstream maintainer |
 | Do the wave `module-ecommerce-*` packages stay the plan? | Pause them. They have their own data model, and `module-ecommerce-dropshipping`'s manifest is invalid | Upstream maintainer |
-| Move to manager `1.4.4`+ | Hold until reviewed, as §11 explains. An upstream fix giving its provider per-module isolation would make ADR 0014 unnecessary | Upstream maintainer |
+| Move to manager `1.7.0` | Done on `feat/module-manager-1.7`: its provider isolates per module, and ADR 0018 retires the host's copy | — |
 | The checkout's "ship to recipient" option still adds `shipping.drop_shipping_premium` | Kept, so that no price changed in this work. It no longer sends anything to a supplier, so decide whether it should still cost more | You |
 
 **Known limits**

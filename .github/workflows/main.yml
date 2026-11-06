@@ -111,7 +111,7 @@ jobs:
           # Every required module must be in the image and valid, including those
           # Composer installs outside vendor/, which COPY . . cannot supply.
           docker run --rm --entrypoint php liberu/ecommerce:ci-smoke \
-            /var/www/html/artisan module:validate
+            /var/www/html/artisan module:validate --strict
           docker run --rm --entrypoint php liberu/ecommerce:ci-smoke \
             /var/www/html/artisan theme:validate
 

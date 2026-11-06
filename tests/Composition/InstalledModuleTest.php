@@ -3,12 +3,13 @@
 namespace Tests\Composition;
 
 use App\Models\Store;
-use App\Support\Modules\ModuleInventory;
-use App\Support\Modules\StoreModules;
+use App\Models\Team;
+use App\Support\Modules\TeamModules;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Liberu\Ecommerce\Contracts\Modules\SettingField;
+use Liberu\Foundation\ModuleManager\ModuleInventory;
 use Tests\TestCase;
 
 /**
@@ -43,23 +44,25 @@ class InstalledModuleTest extends TestCase
         $this->artisan('migrate:status', ['--pending' => 1])->assertSuccessful();
     }
 
-    public function test_it_is_off_until_a_store_activates_it_and_only_for_that_store(): void
+    public function test_it_is_off_until_a_team_enables_it_and_only_for_that_teams_stores(): void
     {
-        $modules = app(StoreModules::class);
+        $modules = app(TeamModules::class);
         $module = $this->module();
-        [$a, $b] = Store::factory()->count(2)->create();
+        [$teamA, $teamB] = Team::factory()->count(2)->create();
+        $a = Store::factory()->create(['team_id' => $teamA->id]);
+        $b = Store::factory()->create(['team_id' => $teamB->id]);
 
         $this->assertArrayHasKey($module, $modules->definitions());
         $this->assertFalse($modules->isActive($module, $a->id));
 
-        $modules->setAvailable($module, $a->id, true);
-        $modules->configure($module, $a->id, $this->validSettings($module));
-        $modules->enable($module, $a->id);
+        $modules->setAvailable($module, true);
+        $modules->configure($module, $teamA->id, $this->validSettings($module));
+        $modules->enable($module, $teamA->id);
 
         $this->assertTrue($modules->isActive($module, $a->id));
         $this->assertFalse($modules->isActive($module, $b->id));
 
-        $modules->disable($module, $a->id);
+        $modules->disable($module, $teamA->id);
         $this->assertFalse($modules->isActive($module, $a->id));
     }
 
@@ -76,7 +79,7 @@ class InstalledModuleTest extends TestCase
     {
         $settings = [];
 
-        foreach (app(StoreModules::class)->definition($module)->settings() as $field) {
+        foreach (app(TeamModules::class)->definition($module)->settings() as $field) {
             $settings[$field->key] = match ($field->type) {
                 SettingField::URL => 'https://example.test',
                 SettingField::BOOLEAN => false,

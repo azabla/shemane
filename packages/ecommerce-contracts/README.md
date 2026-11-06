@@ -6,7 +6,7 @@ It holds interfaces and small value objects only: no Laravel models and no frame
 
 | Namespace | For |
 | --- | --- |
-| `Modules` | Declaring a module to stores, reading its per-store state, panel plugins, activation hooks, abilities |
+| `Modules` | Declaring a module to teams, reading its state for a store or a team, panel plugins, activation hooks, abilities |
 | `Fulfilment` | Sending orders to a supplier and reading tracking |
 | `Catalog` | Describing a supplier's products for the core to import |
 

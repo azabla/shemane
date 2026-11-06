@@ -1,6 +1,6 @@
 # Modules are installed per deployment and activated per store
 
-**Status**: accepted, 2026-11-04.
+**Status**: superseded by [ADR 0019](./0019-team-module-activation.md), 2026-11-06. Accepted 2026-11-04.
 
 ADR 0011 made enablement deployment configuration, because providers, routes and config caches must be fixed at boot. That is right and stays, but it cannot express "this store uses Printful and that one does not", and every store in a deployment shares one codebase.
 

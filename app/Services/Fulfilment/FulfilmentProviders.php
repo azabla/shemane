@@ -2,7 +2,7 @@
 
 namespace App\Services\Fulfilment;
 
-use App\Support\Modules\StoreModules;
+use App\Support\Modules\TeamModules;
 use Illuminate\Contracts\Container\Container;
 use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentProvider;
 use Liberu\Ecommerce\Contracts\Modules\ModuleNotActive;
@@ -13,7 +13,7 @@ final class FulfilmentProviders
     /** @var array<string, FulfilmentProvider>|null */
     private ?array $providers = null;
 
-    public function __construct(private readonly Container $container, private readonly StoreModules $modules) {}
+    public function __construct(private readonly Container $container, private readonly TeamModules $modules) {}
 
     /** @return array<string, FulfilmentProvider> */
     public function all(): array
