@@ -17,7 +17,7 @@ use Liberu\Ecommerce\Contracts\Modules\SettingField;
 
 /**
  * The platform offers installed modules; a team enables and configures them; its stores inherit
- * that. Modules still ask by store through ModuleState. Scoped, so nothing carries between requests
+ * that. Modules ask by store or by team through ModuleState. Scoped, so nothing carries between requests
  * or jobs under Octane or Horizon. Callers authorize; this enforces only what is true for everyone.
  */
 final class TeamModules implements ModuleState
@@ -60,6 +60,11 @@ final class TeamModules implements ModuleState
         return Store::current()?->id ?? StoreContext::forWrites();
     }
 
+    public function currentTeamId(): ?int
+    {
+        return StoreContext::teamForWrites();
+    }
+
     public function teamOfStore(int $storeId): ?int
     {
         if (! array_key_exists($storeId, $this->teams)) {
@@ -74,7 +79,12 @@ final class TeamModules implements ModuleState
     {
         $teamId = $this->teamFor($storeId);
 
-        return $teamId !== null && $this->status($module, $teamId) === 'active';
+        return $teamId !== null && $this->isActiveForTeam($module, $teamId);
+    }
+
+    public function isActiveForTeam(string $module, int $teamId): bool
+    {
+        return $this->status($module, $teamId) === 'active';
     }
 
     public function settings(string $module, ?int $storeId = null): array
@@ -84,6 +94,15 @@ final class TeamModules implements ModuleState
 
         if ($teamId === null || ! $this->isActive($module, $storeId)) {
             throw ModuleNotActive::for($module, $storeId);
+        }
+
+        return $this->row($module, $teamId)?->settings ?? [];
+    }
+
+    public function teamSettings(string $module, int $teamId): array
+    {
+        if (! $this->isActiveForTeam($module, $teamId)) {
+            throw ModuleNotActive::forTeam($module, $teamId);
         }
 
         return $this->row($module, $teamId)?->settings ?? [];

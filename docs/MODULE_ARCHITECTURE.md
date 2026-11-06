@@ -189,7 +189,12 @@ Reading state, by injecting `ModuleState`:
 ```php
 $state->isActive('ecommerce-acme', $storeId);   // null means the current request's store
 $state->settings('ecommerce-acme', $storeId);   // throws ModuleNotActive for a store without it
+
+$state->isActiveForTeam('ecommerce-acme', $teamId);
+$state->teamSettings('ecommerce-acme', $teamId); // the same settings every store of the team reads
 ```
+
+`currentStoreId()` is null in the panel of a team with several stores; the core never picks one. `currentTeamId()` is the storefront's team or the panel's team, and null on the platform. Work that writes store rows, such as importing products, names its store explicitly.
 
 Under the hood this is `App\Support\Modules\TeamModules`. It is scoped, and resolves each store to its team, so nothing crosses requests or jobs under Octane or Horizon.
 
@@ -198,7 +203,7 @@ Optional interfaces on the definition:
 | Interface | For |
 | --- | --- |
 | `ProvidesPanelPlugins` | Adding Filament plugins to `admin` or `app` |
-| `ProvidesConfigurationPage` | Configuring on the module's own page instead of the generated form |
+| `ProvidesConfigurationPage` | Configuring on the module's own page instead of the generated form. `configurationUrl()` takes the team id |
 | `ReactsToActivation` | Running something when a store turns it on or off |
 
 ### Filament
@@ -211,15 +216,15 @@ A module's pages are registered for the whole deployment, so each one must gate 
 public static function canAccess(): bool
 {
     $state = app(ModuleState::class);
-    $storeId = $state->currentStoreId();
+    $teamId = $state->currentTeamId();
 
-    return $storeId !== null
-        && $state->isActive('ecommerce-acme', $storeId)
-        && Gate::allows(Abilities::MANAGE_STORE, $storeId);
+    return $teamId !== null
+        && $state->isActiveForTeam('ecommerce-acme', $teamId)
+        && Gate::allows(Abilities::MANAGE_MODULES, $teamId);
 }
 ```
 
-Modules ask `Abilities::MANAGE_STORE`, `MANAGE_CATALOGUE` or `MANAGE_ORDERS`, each taking a store id, and never name a role. `strictAuthorization()` makes a module model with no policy fail loudly.
+Modules ask `Abilities::MANAGE_MODULES`, taking a team id, or `MANAGE_STORE`, `MANAGE_CATALOGUE` or `MANAGE_ORDERS`, each taking a store id, and never name a role. `strictAuthorization()` makes a module model with no policy fail loudly.
 
 ### Routes
 

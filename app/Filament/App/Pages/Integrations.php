@@ -2,7 +2,6 @@
 
 namespace App\Filament\App\Pages;
 
-use App\Models\Store;
 use App\Models\Team;
 use App\Support\Modules\ModuleActivationRefused;
 use App\Support\Modules\TeamModules;
@@ -53,12 +52,6 @@ class Integrations extends Page implements HasTable
         return $team;
     }
 
-    /** A module's own configuration page takes a store; any of the team's stores reaches the same settings. */
-    private function anyStoreId(): ?int
-    {
-        return Store::query()->where('team_id', $this->team()->id)->orderBy('id')->value('id');
-    }
-
     public function content(Schema $schema): Schema
     {
         return $schema->components([EmbeddedTable::make()]);
@@ -101,9 +94,7 @@ class Integrations extends Page implements HasTable
                     ->url(function (array $record) use ($modules) {
                         $definition = $modules->definition($record['key']);
 
-                        $storeId = $this->anyStoreId();
-
-                        return $definition instanceof ProvidesConfigurationPage && $storeId !== null ? $definition->configurationUrl($storeId) : null;
+                        return $definition instanceof ProvidesConfigurationPage ? $definition->configurationUrl($this->team()->id) : null;
                     })
                     ->fillForm(fn (array $record) => $modules->displayableSettings($record['key'], $this->team()->id))
                     ->schema(fn (array $record) => $this->fields($record['key']))

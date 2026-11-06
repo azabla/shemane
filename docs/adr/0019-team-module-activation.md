@@ -11,11 +11,12 @@ ADR 0015 activated and configured modules per store. A team is the tenant and th
 - **Team:** a `team_modules` row per team and module holds `enabled` and encrypted `settings`, managed on **Integrations** by members with `store:manage`.
 - **Store:** inherits its team's modules. A store with no team has none.
 
-`App\Support\Modules\TeamModules` is the only reader and writer, and it is scoped. Modules still ask by store through the unchanged `ModuleState` contract, which resolves the store to its team. `ReactsToActivation` is called for each of the team's stores, and for a store added to a team that already uses the module.
+`App\Support\Modules\TeamModules` is the only reader and writer, and it is scoped. Modules ask by store through `ModuleState`, which resolves the store to its team, or by team through its `currentTeamId()`, `isActiveForTeam()` and `teamSettings()`. `ReactsToActivation` is called for each of the team's stores, and for a store added to a team that already uses the module.
 
 There is no per-store override and no subscription entitlement.
 
 ## Consequences
 
-- `ProvidesConfigurationPage::configurationUrl()` and a module's own pages still take a store id. **Integrations** passes any store of the team, and a page that asks for the current store in the panel gets one only when the team has a single store. A team-level answer belongs in `liberusoftware/ecommerce-contracts`.
+- `ProvidesConfigurationPage::configurationUrl()` takes the team id, and a module's own pages gate on the team and `Abilities::MANAGE_MODULES`. The core never picks a store for a team with several: `currentStoreId()` is null there.
+- `liberusoftware/ecommerce-contracts` changed in place at 1.0.0, which has not been released.
 - Credentials are per team, with no environment fallback.

@@ -10,4 +10,9 @@ final class ModuleNotActive extends RuntimeException
     {
         return new self("Module [{$module}] is not active for store [".($storeId ?? 'none').'].');
     }
+
+    public static function forTeam(string $module, int $teamId): self
+    {
+        return new self("Module [{$module}] is not active for team [{$teamId}].");
+    }
 }

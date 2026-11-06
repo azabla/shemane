@@ -15,6 +15,7 @@ use App\Support\Modules\TeamModules;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Liberu\Ecommerce\Contracts\Modules\Abilities;
@@ -410,7 +411,6 @@ class TeamModuleLifecycleTest extends TestCase
         $this->assertSame(0, TeamModule::query()->count());
     }
 
-    /** A module's own page asks for the current store, which a panel can only name for a team with one store. */
     public function test_the_modules_own_filament_page_follows_activation_and_authorization(): void
     {
         $this->merchant(team: $this->teamB);
@@ -434,9 +434,9 @@ class TeamModuleLifecycleTest extends TestCase
                 return 'fixture-own-page';
             }
 
-            public function configurationUrl(int $storeId): string
+            public function configurationUrl(int $teamId): string
             {
-                return "https://shop.test/fixture-settings/{$storeId}";
+                return "https://shop.test/fixture-settings/{$teamId}";
             }
         };
         $this->app->instance('fixture-own-page', $definition);
@@ -447,7 +447,55 @@ class TeamModuleLifecycleTest extends TestCase
         $this->merchant();
 
         Livewire::test(Integrations::class)
-            ->assertTableActionHasUrl('configure', "https://shop.test/fixture-settings/{$this->storeA->id}", 'fixture-own-page');
+            ->assertTableActionHasUrl('configure', "https://shop.test/fixture-settings/{$this->teamA->id}", 'fixture-own-page');
+    }
+
+    public function test_a_team_with_several_stores_reaches_its_modules_without_a_current_store(): void
+    {
+        $this->activate($this->teamA);
+        $this->merchant();
+        app()->forgetScopedInstances();
+        $state = app(ModuleState::class);
+
+        $this->assertNull($state->currentStoreId(), 'No store of a two-store team may be chosen for it.');
+        $this->assertSame($this->teamA->id, $state->currentTeamId());
+        $this->assertTrue($state->isActiveForTeam(self::MODULE, $this->teamA->id));
+        $this->assertSame('secret-token', $state->teamSettings(self::MODULE, $this->teamA->id)['api_token']);
+        $this->assertTrue(FixturePage::canAccess());
+
+        $this->merchant('viewer');
+        $this->assertFalse(FixturePage::canAccess());
+    }
+
+    public function test_team_level_state_is_isolated_between_teams(): void
+    {
+        $this->activate($this->teamA);
+        $state = app(ModuleState::class);
+
+        $this->assertFalse($state->isActiveForTeam(self::MODULE, $this->teamB->id));
+        $this->expectException(ModuleNotActive::class);
+        $this->expectExceptionMessage("team [{$this->teamB->id}]");
+        $state->teamSettings(self::MODULE, $this->teamB->id);
+    }
+
+    public function test_a_module_page_is_refused_to_another_teams_merchant(): void
+    {
+        $this->activate($this->teamA);
+        $this->merchant(team: $this->teamB);
+        app()->forgetScopedInstances();
+
+        $this->assertSame($this->teamB->id, app(ModuleState::class)->currentTeamId());
+        $this->assertFalse(FixturePage::canAccess());
+        $this->assertFalse(Gate::allows(Abilities::MANAGE_MODULES, $this->teamA->id));
+        $this->assertTrue(Gate::allows(Abilities::MANAGE_MODULES, $this->teamB->id));
+        $this->assertFalse(Gate::allows(Abilities::MANAGE_MODULES, 0));
+    }
+
+    public function test_the_platform_has_no_current_team(): void
+    {
+        $this->platformAdmin();
+
+        $this->assertNull(app(ModuleState::class)->currentTeamId());
     }
 
     private function assertRefused(callable $action): void
