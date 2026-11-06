@@ -26,7 +26,7 @@
         "liberusoftware/composer-installer": "^1.1",
         "liberusoftware/ecommerce-contracts": "^1.0",
         "liberusoftware/module-manager": "^1.7",
-        "liberusoftware/module-manager-filament": "^1.6",
+        "liberusoftware/module-manager-filament": "^1.7",
         "liberusoftware/tenancy": "^1.0",
         "liberusoftware/users-roles": "^1.0",
         "livewire/livewire": "^4.4.8",
@@ -97,8 +97,6 @@
     "extra": {
         "laravel": {
             "dont-discover": [
-                "laravel/pulse",
-                "laravel/telescope",
                 "liberusoftware/tenancy",
                 "liberusoftware/users-roles"
             ]

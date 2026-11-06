@@ -12,6 +12,7 @@ use App\Models\TeamModule;
 use App\Models\User;
 use App\Support\Modules\ModuleActivationRefused;
 use App\Support\Modules\TeamModules;
+use Composer\InstalledVersions;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,7 @@ use Liberu\Ecommerce\FixtureSupplier\FixtureDefinition;
 use Liberu\Foundation\ModuleManager\ModuleInventory;
 use Liberu\Foundation\ModuleManagerFilament\Pages\FoundationOperations;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Feature\Modules\Concerns\InstallsFixtureModules;
@@ -505,6 +507,22 @@ class TeamModuleLifecycleTest extends TestCase
 
         $this->merchant();
         $this->assertFalse(Gate::allows('viewModuleDiagnostics'));
+    }
+
+    public function test_platform_staff_with_manage_modules_open_the_diagnostics_page_without_observability(): void
+    {
+        $this->assertFalse(InstalledVersions::isInstalled('liberusoftware/observability'));
+        $page = FoundationOperations::getUrl(panel: 'admin');
+
+        $staff = User::factory()->create();
+        foreach (['access_admin_panel', 'manage_modules'] as $permission) {
+            $staff->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+        }
+
+        $this->actingAs($staff)->get($page)->assertOk()->assertSee('tenancy')->assertHeaderMissing('X-Correlation-ID');
+
+        $panelOnly = User::factory()->create()->givePermissionTo(Permission::findOrCreate('access_admin_panel', 'web'));
+        $this->actingAs($panelOnly)->get($page)->assertForbidden();
     }
 
     private function assertRefused(callable $action): void

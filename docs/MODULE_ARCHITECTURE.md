@@ -69,7 +69,7 @@ php artisan module:clear
 php artisan module:features
 ```
 
-Root `composer.json` lists `tenancy` and `users-roles` under `extra.laravel.dont-discover`, because both packages declare `extra.laravel.providers`, and `laravel/pulse` and `laravel/telescope`, which `observability` brings and this host does not run (ADR 0018). `module:validate --strict`, which CI and the image build run, fails on any module that Laravel's package discovery would still register.
+Root `composer.json` lists `tenancy` and `users-roles` under `extra.laravel.dont-discover`, because both packages declare `extra.laravel.providers`. `module:validate --strict`, which CI and the image build run, fails on any module that Laravel's package discovery would still register.
 
 A provider that throws in `register()` is isolated. One that throws in `boot()` is not, because Laravel offers no hook for it. The composition test in §9 catches that before a release.
 
