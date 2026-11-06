@@ -4,20 +4,19 @@ namespace Liberu\Ecommerce\Printful\Tests;
 
 use App\Models\Product;
 use App\Models\Store;
-use App\Support\Modules\StoreModules;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
 use Liberu\Ecommerce\Printful\PrintfulCatalog;
 use Liberu\Ecommerce\Printful\PrintfulDefinition;
-use Tests\Feature\Concerns\ActivatesStoreModules;
+use Tests\Feature\Concerns\ActivatesModules;
 use Tests\Feature\Concerns\BuildsVariants;
 use Tests\TestCase;
 
 /** The Printful store becomes made-to-order products whose variants carry Printful's ids. */
 class PrintfulCatalogImportTest extends TestCase
 {
-    use ActivatesStoreModules;
+    use ActivatesModules;
     use BuildsVariants;
     use RefreshDatabase;
 
@@ -108,7 +107,7 @@ class PrintfulCatalogImportTest extends TestCase
 
     public function test_without_printful_active_the_import_does_nothing(): void
     {
-        app(StoreModules::class)->disable(PrintfulDefinition::KEY, Store::query()->orderBy('id')->firstOrFail()->id);
+        $this->deactivateModule(PrintfulDefinition::KEY, Store::query()->orderBy('id')->firstOrFail()->id);
 
         $this->artisan('printful:import-products')->expectsOutputToContain('skipped')->assertSuccessful();
 

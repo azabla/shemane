@@ -17,7 +17,7 @@ test -f "modules/$name/module.json" || { echo "$package did not install to modul
 
 export MODULES_ENABLED="$name" MODULE_UNDER_TEST="$name"
 
-php artisan module:validate
+php artisan module:validate --strict
 php artisan module:list
 php artisan test tests/Composition
 

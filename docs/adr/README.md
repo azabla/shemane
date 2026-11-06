@@ -19,9 +19,11 @@ Gaps become findings, never silent exemptions. A deviation without an ADR is a b
 | [0011](./0011-adopting-module-manager.md) | Adopting `module-manager` drops runtime module enablement | behaviour loss |
 | [0012](./0012-deleting-the-empty-cms-scaffolds.md) | The Article/FAQ and `seo_settings` scaffolds are deleted, not moved | behaviour loss |
 | [0013](./0013-cms-and-crm-packages-are-built-from-ground.md) | CMS and CRM packages are built from ground; local code is deleted at cutover | supersedes a deferral |
-| [0014](./0014-host-module-registration.md) | The host registers modules with the manager's classes, not its provider | deviation — `MODULES.md` §6 |
-| [0015](./0015-per-store-module-activation.md) | Modules are installed per deployment and activated per store | extension of ADR 0011 |
+| [0014](./0014-host-module-registration.md) | The host registers modules with the manager's classes, not its provider. Superseded by 0018 | deviation — `MODULES.md` §6 |
+| [0015](./0015-per-store-module-activation.md) | Modules are installed per deployment and activated per store. Superseded by 0019 | extension of ADR 0011 |
 | [0016](./0016-ecommerce-contracts-package.md) | Modules and the core meet in a separate contracts package | extension of `MODULE_DEVELOPMENT.md` R4 |
+| [0018](./0018-the-managers-provider-registers-modules.md) | The manager's provider registers modules, with per-module isolation | conforms — `MODULES.md` §6 |
+| [0019](./0019-team-module-activation.md) | Modules are offered by the platform and activated per team | extension of ADR 0011 |
 
 Every deviation above also has an upstream issue filed against the document it deviates from — all 23 are filed. One of the 23, [`documentation` #20](https://github.com/liberusoftware/documentation/issues/20), is withdrawn along with ADR 0010: this repository no longer wants §3.2 changed.
 

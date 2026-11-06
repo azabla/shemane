@@ -2,15 +2,15 @@
 
 namespace Tests\Feature\Modules;
 
-use App\Support\Modules\ModuleInventory;
-use App\Support\Modules\ModuleLoader;
-use App\Support\Modules\RequiredModuleFailed;
 use Illuminate\Contracts\Process\ProcessResult;
 use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Liberu\Foundation\ModuleManager\Cache\RegistryCache;
-use Liberu\Foundation\ModuleManager\ModuleRegistry;
+use Liberu\Foundation\ModuleManager\Exceptions\RequiredModuleFailed;
+use Liberu\Foundation\ModuleManager\ModuleDiscovery;
+use Liberu\Foundation\ModuleManager\ModuleInventory;
+use Liberu\Foundation\ModuleManager\ModuleLoader;
 use Liberu\Foundation\ModuleManager\ModuleValidator;
 use Liberu\Foundation\Tenancy\TenancyServiceProvider;
 use Liberu\Foundation\UsersRoles\UsersRolesServiceProvider;
@@ -93,7 +93,7 @@ class ModuleBootTest extends TestCase
         $result = Process::path(base_path())->env(['MODULES_ENABLED' => '', 'MODULES_DISABLED' => ''])->run(['php', 'artisan', 'module:validate']);
 
         $this->assertTrue($result->successful(), $result->errorOutput().$result->output());
-        $this->assertStringContainsString('3 installed modules are valid', $result->output());
+        $this->assertStringContainsString('All discovered modules are valid.', $result->output());
         $this->assertTrue($this->runArtisan([], 'module:status', 'tenancy')->successful());
         $this->assertTrue($this->runArtisan([], 'module:features')->successful());
         $this->assertFalse($this->runArtisan([], 'module:status', 'nothing-by-this-name')->successful());
@@ -108,7 +108,7 @@ class ModuleBootTest extends TestCase
 
         $validate = $this->runArtisan(['MODULES_DISABLED' => 'tenancy'], 'module:validate');
         $this->assertFalse($validate->successful());
-        $this->assertStringContainsString('MODULES_DISABLED names a required module', $validate->output().$validate->errorOutput());
+        $this->assertStringContainsString('the disabled list names a required module', $validate->output().$validate->errorOutput());
     }
 
     public function test_an_unreadable_manifest_is_reported_and_stops_nothing_else(): void
@@ -194,8 +194,7 @@ class ModuleBootTest extends TestCase
         $path = "{$this->extra}/registry.cache";
         $loader = fn (bool $cached) => new ModuleLoader(app(ModuleValidator::class), app(RegistryCache::class), [base_path('modules')], [], [], ['module-manager', 'tenancy', 'users-roles'], $cached, $path);
 
-        [$manifests] = $loader(false)->discover();
-        app(RegistryCache::class)->write(new ModuleRegistry($manifests), $path);
+        app(RegistryCache::class)->write((new ModuleDiscovery)->discover([base_path('modules')]), $path);
 
         $this->assertSame(array_keys($loader(false)->load()->booted), array_keys($loader(true)->load()->booted));
     }

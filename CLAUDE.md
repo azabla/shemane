@@ -113,8 +113,8 @@ the supplier, whatever the request names. `CheckoutService::suppliersFor()` and
 `order_fulfilments` row per supplier and `DispatchDropshippingOrder` submits it through a
 `FulfilmentProvider`. Never add a supplier branch to the core.
 
-**Modules are installed per deployment and activated per store.** `ModuleServiceProvider` is the only
-registrar; `StoreModules` holds each store's state. See
+**Modules are installed per deployment, offered by the platform and activated per team.** The
+module manager's provider is the only registrar; `TeamModules` holds each team's state, which its stores inherit. See
 [`docs/MODULE_ARCHITECTURE.md`](./docs/MODULE_ARCHITECTURE.md).
 
 **Order state is a transition, not an assignment.** `Order::transitionTo()` writes the history row;
@@ -139,7 +139,7 @@ decided. See [`docs/THEMES.md`](./docs/THEMES.md).
 | [`docs/CONFORMANCE.md`](./docs/CONFORMANCE.md) | A dated snapshot of the gap between this repo and the reference design. Not edited |
 | [`docs/MIGRATION_PLAN.md`](./docs/MIGRATION_PLAN.md) | Living. Sequences the structural work and records each wave as it lands |
 | [`docs/MODULE_DEVELOPMENT.md`](./docs/MODULE_DEVELOPMENT.md) | Package, repository and namespace naming; the dependency rules |
-| [`docs/MODULE_ARCHITECTURE.md`](./docs/MODULE_ARCHITECTURE.md) | How modules are installed, activated per store and built; what is still open |
+| [`docs/MODULE_ARCHITECTURE.md`](./docs/MODULE_ARCHITECTURE.md) | How modules are installed, activated per team and built; what is still open |
 | [`docs/THEMES.md`](./docs/THEMES.md) | Storefront themes: per-channel view overrides, tokens, the presentation contract |
 | [`docs/adr/`](./docs/adr/) | One decision per file |
 | [`docs/agents/`](./docs/agents/) | Issue tracker, triage labels, domain docs |

@@ -1,6 +1,6 @@
 # The host registers modules with the manager's classes, not its provider
 
-**Status**: accepted, 2026-11-04.
+**Status**: superseded by [ADR 0018](./0018-the-managers-provider-registers-modules.md), 2026-11-06. Accepted 2026-11-04.
 
 `liberusoftware/module-manager` has been installed since ADR 0011, and its provider was never registered. So `MODULES_ENABLED` did nothing, no `module:*` command existed, and `users-roles` and `tenancy` booted through Laravel package discovery regardless of configuration.
 

@@ -1,5 +1,7 @@
 /vendor/
 /modules/module-manager/
+/modules/module-manager-filament/
+/modules/observability/
 /modules/ecommerce-*/
 /modules/fixture-*/
 /themes/fixture-*/

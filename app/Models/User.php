@@ -23,10 +23,11 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use Liberu\Foundation\Observability\Contracts\ObservabilityActor;
 use Liberu\Foundation\UsersRoles\Models\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser, HasDefaultTenant, HasTenants
+class User extends Authenticatable implements FilamentUser, HasDefaultTenant, HasTenants, ObservabilityActor
 {
     use Billable;
     use HasApiTokens;
@@ -73,6 +74,12 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
             'app' => $this->allTeams()->isNotEmpty() || Gate::forUser($this)->allows('create', Team::class),
             default => false,
         };
+    }
+
+    /** The platform operator, for the module manager's diagnostics and the observability gates. */
+    public function isAdmin(): bool
+    {
+        return StoreAccess::platform($this, 'manage_modules');
     }
 
     public function wishlist()
