@@ -509,6 +509,30 @@ class TeamModuleLifecycleTest extends TestCase
         $this->assertFalse(Gate::allows('viewModuleDiagnostics'));
     }
 
+    public function test_each_action_re_renders_the_row_with_its_new_state(): void
+    {
+        $this->activate($this->teamA);
+        $this->merchant();
+
+        Livewire::test(Integrations::class)
+            ->assertTableColumnFormattedStateSet('status', 'On', self::MODULE)
+            ->callTableAction('disable', self::MODULE)
+            ->assertTableColumnFormattedStateSet('status', 'Off', self::MODULE)
+            ->assertTableActionVisible('enable', self::MODULE)
+            ->callTableAction('enable', self::MODULE)
+            ->assertTableColumnFormattedStateSet('status', 'On', self::MODULE);
+
+        $this->platformAdmin();
+
+        Livewire::test(Modules::class)
+            ->assertTableColumnStateSet('teams', 1, self::MODULE)
+            ->callTableAction('withdraw', self::MODULE)
+            ->assertTableColumnStateSet('availability', 'not offered', self::MODULE)
+            ->assertTableColumnStateSet('teams', 0, self::MODULE)
+            ->callTableAction('offer', self::MODULE)
+            ->assertTableColumnStateSet('availability', 'offered', self::MODULE);
+    }
+
     public function test_platform_staff_with_manage_modules_open_the_diagnostics_page_without_observability(): void
     {
         $this->assertFalse(InstalledVersions::isInstalled('liberusoftware/observability'));

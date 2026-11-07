@@ -73,6 +73,7 @@ class Modules extends Page implements HasTable
     {
         abort_unless(static::canAccess(), 403);
         $modules->setAvailable($module, $available);
+        $this->flushCachedTableRecords();
 
         Notification::make()->title($available ? 'Offered to teams' : 'Withdrawn from every team')->success()->send();
     }

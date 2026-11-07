@@ -106,6 +106,7 @@ class Integrations extends Page implements HasTable
                             $action->halt();
                         }
 
+                        $this->flushCachedTableRecords();
                         Notification::make()->title('Settings saved')->success()->send();
                     }),
                 Action::make('enable')
@@ -114,6 +115,7 @@ class Integrations extends Page implements HasTable
                     ->action(function (array $record) use ($modules) {
                         try {
                             $modules->enable($record['key'], $this->team()->id);
+                            $this->flushCachedTableRecords();
                             Notification::make()->title('Module enabled')->success()->send();
                         } catch (ModuleActivationRefused $e) {
                             Notification::make()->title($e->getMessage())->danger()->send();
@@ -125,6 +127,7 @@ class Integrations extends Page implements HasTable
                     ->visible(fn (array $record) => in_array($record['status'], ['active', 'unconfigured'], true))
                     ->action(function (array $record) use ($modules) {
                         $modules->disable($record['key'], $this->team()->id);
+                        $this->flushCachedTableRecords();
                         Notification::make()->title('Module disabled')->success()->send();
                     }),
             ]);
