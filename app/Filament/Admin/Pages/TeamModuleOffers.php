@@ -14,11 +14,8 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 
-/**
- * Which installed modules the platform offers to teams. Whether a module loaded, and why not, is
- * the module manager's Foundation Operations page; installing is Composer and a deploy.
- */
-class Modules extends Page implements HasTable
+/** Which booted integrations the platform offers to teams. Turning modules on and off is the Modules page. */
+class TeamModuleOffers extends Page implements HasTable
 {
     use InteractsWithTable;
 
@@ -26,7 +23,9 @@ class Modules extends Page implements HasTable
 
     protected static string|\UnitEnum|null $navigationGroup = 'Settings';
 
-    protected static ?string $title = 'Module availability';
+    protected static ?string $title = 'Team integrations';
+
+    protected static ?string $slug = 'team-integrations';
 
     public static function canAccess(): bool
     {
@@ -48,7 +47,6 @@ class Modules extends Page implements HasTable
                 TextColumn::make('label')->label('Module'),
                 TextColumn::make('availability')->badge()->color(fn (string $state) => match ($state) {
                     'offered' => 'success',
-                    'not installed' => 'gray',
                     default => 'warning',
                 }),
                 TextColumn::make('teams')->label('Teams using it'),
@@ -92,10 +90,6 @@ class Modules extends Page implements HasTable
                 'teams' => count($modules->teamsEnabling($name)),
                 'note' => $definition->description(),
             ];
-        }
-
-        foreach ((array) config('ecommerce-modules.catalogue', []) as $name => $entry) {
-            $rows[$name] ??= ['module' => $name, 'label' => $name, 'availability' => 'not installed', 'teams' => '—', 'note' => "{$entry['description']} Install with: composer require {$entry['package']}"];
         }
 
         ksort($rows);

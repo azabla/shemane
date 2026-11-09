@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c979ed2498d9407c104ab0c22b61960a",
+    "content-hash": "9b36eea4ea4cde39d4248c65aec45357",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5293,27 +5293,18 @@
         },
         {
             "name": "liberusoftware/module-manager",
-            "version": "1.7.0",
+            "version": "1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberusoftware/module-module-manager.git",
-                "reference": "990c495581e8fcc1b36ffef9a17b2a3556506dd1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/liberusoftware/module-module-manager/zipball/990c495581e8fcc1b36ffef9a17b2a3556506dd1",
-                "reference": "990c495581e8fcc1b36ffef9a17b2a3556506dd1",
-                "shasum": ""
+                "reference": "a3fe685a9b42ab945eb98455e5f5bd6d923031d9"
             },
             "require": {
                 "composer/semver": "^3.5.2",
                 "illuminate/contracts": "^13.38.0",
+                "illuminate/database": "^13.38.0",
                 "illuminate/support": "^13.38.0",
                 "php": "^8.5"
-            },
-            "require-dev": {
-                "liberusoftware/package-testbench": "^1.5",
-                "pestphp/pest": "^5.3.3"
             },
             "type": "liberu-module",
             "extra": {
@@ -5325,45 +5316,20 @@
                 "psr-4": {
                     "Liberu\\Foundation\\ModuleManager\\": "src/"
                 }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Deterministic manifest discovery and runtime enablement for Liberu modules.",
-            "support": {
-                "issues": "https://github.com/liberusoftware/module-module-manager/issues",
-                "source": "https://github.com/liberusoftware/module-module-manager/tree/1.7.0"
-            },
-            "time": "2026-11-06T08:31:26+00:00",
-            "published-time": "2026-11-06T08:32:01+00:00"
+            }
         },
         {
             "name": "liberusoftware/module-manager-filament",
-            "version": "1.7.0",
+            "version": "1.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberusoftware/module-module-manager-filament.git",
-                "reference": "53c3c78c3c1adbed2d9208332393172dad4b4232"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/liberusoftware/module-module-manager-filament/zipball/53c3c78c3c1adbed2d9208332393172dad4b4232",
-                "reference": "53c3c78c3c1adbed2d9208332393172dad4b4232",
-                "shasum": ""
+                "reference": "bc614cd25dd42236ef010d4fb44ac2befc1235b6"
             },
             "require": {
                 "filament/filament": "^5.11.0",
-                "liberusoftware/module-manager": "^1.0",
+                "liberusoftware/module-manager": "^1.8",
                 "php": "^8.5"
-            },
-            "require-dev": {
-                "liberusoftware/package-testbench": "^1.5",
-                "livewire/livewire": "^4.0",
-                "pestphp/pest": "^5.3.3"
-            },
-            "suggest": {
-                "liberusoftware/observability": "Lets users implementing ObservabilityActor reach the page when the application defines no viewModuleDiagnostics gate."
             },
             "type": "liberu-module",
             "extra": {
@@ -5375,18 +5341,7 @@
                 "psr-4": {
                     "Liberu\\Foundation\\ModuleManagerFilament\\": "src/"
                 }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Filament operations presentation adapter for the Liberu Module Manager.",
-            "support": {
-                "issues": "https://github.com/liberusoftware/module-module-manager-filament/issues",
-                "source": "https://github.com/liberusoftware/module-module-manager-filament/tree/1.7.0"
-            },
-            "time": "2026-11-06T20:08:51+00:00",
-            "published-time": "2026-11-06T20:11:01+00:00"
+            }
         },
         {
             "name": "liberusoftware/tenancy",

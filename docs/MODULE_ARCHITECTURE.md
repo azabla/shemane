@@ -19,10 +19,9 @@ Nothing here has been published or pushed. §12 lists what is open.
 
 | Who | Does | Where it is recorded |
 | --- | --- | --- |
-| Maintainers | Catalogue what is supported | `config/ecommerce-modules.php` |
-| Deployment operator | Install with Composer, and enable | `composer.lock`, `MODULES_ENABLED` |
+| Deployment operator | Install and remove with Composer | `composer.lock`; `MODULES_ENABLED` and `MODULES_DISABLED` set the defaults, and `MODULES_DISABLED` overrides everything else |
 | The core | Gate each store by its team; the manager discovers, validates and registers | `ModuleServiceProvider`, `ModuleManagerServiceProvider` |
-| Platform admin | Offer a module to teams; see what loaded and why not | `module_availability`, on **Settings → Module availability**; **Operations → Foundation Operations** from `module-manager-filament` |
+| Platform admin | Turn installed modules on and off; offer them to teams; see what loaded and why not | `module_activations`, on **Operations → Modules**, from `module-manager-filament`; `module_availability`, on **Settings → Team integrations**; **Operations → Foundation Operations** from `module-manager-filament` |
 | Team | Enable and configure it; every store of the team inherits it | `team_modules.enabled` and `settings`, on **Integrations** |
 | Existing authorization | Decide who may do any of this | `StoreAccess`, Gate abilities |
 
@@ -284,9 +283,9 @@ The flow:
 **Install**
 
 1. `composer require liberusoftware/ecommerce-acme`, and commit the lock file.
-2. Add it to `MODULES_ENABLED`.
-3. Merge, let CI pass, build and deploy. The deploy runs its migrations.
-4. On **Settings → Module availability**, offer it. Each team then configures and enables it on **Integrations**.
+2. Merge, let CI pass, build and deploy. The deploy runs its migrations.
+3. Enable it on **Operations → Modules**.
+4. On **Settings → Team integrations**, offer it. Each team then configures and enables it on **Integrations**.
 
 To develop locally against an unpublished module, add a temporary path repository with `composer config repositories.acme path ../module-ecommerce-acme`, and do not commit it.
 
@@ -299,8 +298,8 @@ To develop locally against an unpublished module, add a temporary path repositor
 
 These are separate steps on purpose, and the data stays unless you choose step 3.
 
-1. Withdraw it on **Settings → Module availability**, which turns it off for every team. The page shows how many teams use it.
-2. Remove it from `MODULES_ENABLED` and deploy. The code is present and does not boot.
+1. Withdraw it on **Settings → Team integrations**, which turns it off for every team. The page shows how many teams use it.
+2. Disable it on **Operations → Modules**. The code is present and does not boot.
 3. Optional and destructive, while the files still exist: `php artisan migrate:reset --path=modules/<name>/database/migrations`, and delete its `team_modules` and `module_availability` rows.
 4. `composer remove`, and deploy.
 

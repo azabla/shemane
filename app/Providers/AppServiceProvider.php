@@ -101,5 +101,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('viewModuleDiagnostics', fn (User $user) => StoreAccess::platform($user, 'manage_modules'));
+        Gate::define('manageModules', fn (User $user) => StoreAccess::platform($user, 'manage_modules'));
     }
 }

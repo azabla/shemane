@@ -7,7 +7,7 @@ ADR 0015 activated and configured modules per store. A team is the tenant and th
 ## Decision
 
 - **Application:** Composer and `config/modules.php` decide what is installed and booted.
-- **Platform:** a `module_availability` row per module says whether teams may use it, set on **Settings → Module availability**. Withdrawing a module turns it off for every team and keeps their settings.
+- **Platform:** a `module_availability` row per module says whether teams may use it, set on **Settings → Team integrations**. Withdrawing a module turns it off for every team and keeps their settings.
 - **Team:** a `team_modules` row per team and module holds `enabled` and encrypted `settings`, managed on **Integrations** by members with `store:manage`.
 - **Store:** inherits its team's modules. A store with no team has none.
 

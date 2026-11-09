@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Modules;
 
-use App\Filament\Admin\Pages\Modules;
+use App\Filament\Admin\Pages\TeamModuleOffers;
 use App\Filament\App\Pages\Integrations;
 use App\Models\Channel;
 use App\Models\ChannelDomain;
@@ -303,7 +303,7 @@ class TeamModuleLifecycleTest extends TestCase
     {
         $this->platformAdmin();
 
-        Livewire::test(Modules::class)
+        Livewire::test(TeamModuleOffers::class)
             ->assertCanSeeTableRecords([self::MODULE])
             ->callTableAction('offer', self::MODULE)
             ->assertHasNoTableActionErrors();
@@ -313,7 +313,7 @@ class TeamModuleLifecycleTest extends TestCase
         app(TeamModules::class)->configure(self::MODULE, $this->teamA->id, ['api_token' => 't', 'region' => 'eu']);
         app(TeamModules::class)->enable(self::MODULE, $this->teamA->id);
 
-        Livewire::test(Modules::class)->callTableAction('withdraw', self::MODULE);
+        Livewire::test(TeamModuleOffers::class)->callTableAction('withdraw', self::MODULE);
         app()->forgetScopedInstances();
 
         $this->assertFalse(app(TeamModules::class)->isAvailable(self::MODULE));
@@ -323,11 +323,11 @@ class TeamModuleLifecycleTest extends TestCase
     public function test_merchants_and_ordinary_users_cannot_reach_the_platform_pages(): void
     {
         $this->merchant();
-        $this->assertFalse(Modules::canAccess());
+        $this->assertFalse(TeamModuleOffers::canAccess());
         $this->assertFalse(FoundationOperations::canAccess());
 
         $this->actingAs(User::factory()->create());
-        $this->assertFalse(Modules::canAccess());
+        $this->assertFalse(TeamModuleOffers::canAccess());
         $this->assertFalse(FoundationOperations::canAccess());
     }
 
@@ -524,7 +524,7 @@ class TeamModuleLifecycleTest extends TestCase
 
         $this->platformAdmin();
 
-        Livewire::test(Modules::class)
+        Livewire::test(TeamModuleOffers::class)
             ->assertTableColumnStateSet('teams', 1, self::MODULE)
             ->callTableAction('withdraw', self::MODULE)
             ->assertTableColumnStateSet('availability', 'not offered', self::MODULE)
