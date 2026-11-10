@@ -108,6 +108,13 @@ jobs:
           docker run --rm --entrypoint php liberu/ecommerce:ci-smoke \
             /var/www/html/artisan --version
 
+          # Every required module must be in the image and valid, including those
+          # Composer installs outside vendor/, which COPY . . cannot supply.
+          docker run --rm --entrypoint php liberu/ecommerce:ci-smoke \
+            /var/www/html/artisan module:validate --strict
+          docker run --rm --entrypoint php liberu/ecommerce:ci-smoke \
+            /var/www/html/artisan theme:validate
+
           # Every asset the vite manifest promises must be in the image. Both
           # layouts call @vite, so a manifest without its assets is a storefront
           # served with no CSS and no JS.

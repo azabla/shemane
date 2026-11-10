@@ -1,0 +1,10 @@
+{
+    "name": "liberusoftware/ecommerce-fixture-throws",
+    "description": "A module whose provider throws, to prove it cannot take the application down.",
+    "type": "liberu-module",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {},
+    "autoload": { "psr-4": { "Liberu\\Ecommerce\\FixtureThrows\\": "src/" } },
+    "extra": { "liberu": { "name": "fixture-throws" } }
+}

@@ -4,6 +4,8 @@ How `ecommerce-laravel` gets from the state recorded in [`CONFORMANCE.md`](./CON
 
 **This document is living.** It is edited as waves land and as the execution epics discover things the plan got wrong. `CONFORMANCE.md` is not — it is a dated snapshot, and the gap between the two is the progress record.
 
+**The running module system is described in [`MODULE_ARCHITECTURE.md`](./MODULE_ARCHITECTURE.md),** which also raises whether these waves remain the plan. As of 2026-11-04 this host installs none of the wave packages.
+
 **This plan does not build the 105 modules.** It sequences the structural work: the enforcement layer, the packaging mechanism, the tenancy fix, four data migrations, and the extraction order. Building modules is carried by the 105 `Architecture: Ecommerce — <module>` epics, which execute against this plan.
 
 ---

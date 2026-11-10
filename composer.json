@@ -8,6 +8,7 @@
     ],
     "license": "MIT",
     "require": {
+        "php": "^8.5",
         "bezhansalleh/filament-shield": "^4.3.1",
         "biostate/filament-menu-builder": "^5.1.0",
         "bursteri/socialstream": "^7.0.0",
@@ -23,12 +24,13 @@
         "laravel/sanctum": "^4.3.3",
         "laravel/tinker": "^3.0.2",
         "liberusoftware/composer-installer": "^1.1",
-        "liberusoftware/module-manager": "^1.4.3",
+        "liberusoftware/ecommerce-contracts": "^1.0",
+        "liberusoftware/module-manager": "^1.8",
+        "liberusoftware/module-manager-filament": "^1.8",
         "liberusoftware/tenancy": "^1.0.1",
         "liberusoftware/users-roles": "^1.0",
         "livewire/livewire": "^4.4.8",
         "orangehill/iseed": "^3.8.1",
-        "php": "^8.5",
         "spatie/laravel-menu": "^4.2.2",
         "spatie/laravel-permission": "^8.3.2",
         "spatie/laravel-query-builder": "^7.3.7",
@@ -94,7 +96,10 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "liberusoftware/tenancy",
+                "liberusoftware/users-roles"
+            ]
         }
     },
     "config": {
@@ -121,6 +126,13 @@
         {
             "type": "path",
             "url": "modules/users-roles",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/*",
             "options": {
                 "symlink": false
             }

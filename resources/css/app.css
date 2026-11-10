@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Composer-installed modules are gitignored, and Tailwind's auto-detection skips ignored paths. */
+@source '../../modules/*/resources/views';
+
 /* Inter as a single variable file — smaller than the three static weights we'd
    otherwise ship, and it gives fractional weight control. Plex Mono is static
    because only two weights are ever used; loading its full range would cost

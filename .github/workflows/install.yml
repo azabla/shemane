@@ -67,6 +67,9 @@ jobs:
     - name: Generate application key
       run: php artisan key:generate
 
+    - name: Validate installed modules
+      run: php artisan module:validate --strict
+
     - name: Wait for MySQL
       run: |
         while ! mysqladmin ping -h"127.0.0.1" -P3306 -uroot -proot --silent; do

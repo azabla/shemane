@@ -1,0 +1,15 @@
+{
+    "name": "liberusoftware/ecommerce-contracts",
+    "description": "The stable boundary between the Liberu ecommerce core and independently distributed modules.",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": "^8.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Liberu\\Ecommerce\\Contracts\\": "src/"
+        }
+    }
+}

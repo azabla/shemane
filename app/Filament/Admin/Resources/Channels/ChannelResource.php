@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Channels;
 
 use App\Filament\Admin\Resources\Channels\Pages\EditChannel;
 use App\Filament\Admin\Resources\Channels\Pages\ListChannels;
+use App\Filament\Schemas\ChannelThemeField;
 use App\Models\Channel;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
@@ -27,8 +28,8 @@ class ChannelResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            // `theme` stays at its default until theme packages select per channel.
             TextInput::make('name')->required()->maxLength(255),
+            ChannelThemeField::make(),
         ]);
     }
 

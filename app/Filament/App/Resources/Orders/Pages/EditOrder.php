@@ -5,6 +5,7 @@ namespace App\Filament\App\Resources\Orders\Pages;
 use App\Filament\App\Resources\Orders\OrderResource;
 use App\Models\Order;
 use App\Services\CheckoutService;
+use App\Services\Fulfilment\OrderFulfilments;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -23,6 +24,12 @@ class EditOrder extends EditRecord
             $this->transitionAction('cancel', 'Cancel', Order::STATUS_CANCELLED, onlyFromPending: true),
             $this->transitionAction('startProcessing', 'Start processing', Order::STATUS_PROCESSING),
             $this->transitionAction('complete', 'Complete', Order::STATUS_COMPLETED),
+            Action::make('retrySuppliers')
+                ->label('Retry supplier')
+                ->icon('heroicon-o-arrow-path')
+                ->requiresConfirmation()
+                ->visible(fn (Order $record) => $record->status === Order::STATUS_SUPPLIER_FAILED)
+                ->action(fn (Order $record) => app(OrderFulfilments::class)->retry($record)),
             DeleteAction::make(),
         ];
     }

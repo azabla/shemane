@@ -39,6 +39,20 @@ class ArchitectureTest extends TestCase
         ]));
     }
 
+    /** A supplier distributed as a package is reached through its contract, or the core cannot run without it. */
+    public function test_the_core_does_not_name_a_packaged_integration(): void
+    {
+        $found = [];
+
+        foreach ($this->phpFiles() as $file) {
+            if (stripos((string) file_get_contents($file->getPathname()), 'printful') !== false) {
+                $found[] = $file->getPathname();
+            }
+        }
+
+        $this->assertSame([], $found, "The core names Printful:\n".implode("\n", $found));
+    }
+
     public function test_no_debug_helpers_are_left_in_shipped_code(): void
     {
         $found = $this->callSites(['dd', 'dump', 'var_dump', 'ray', 'print_r']);

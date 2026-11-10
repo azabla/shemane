@@ -64,6 +64,9 @@ class StoreBackfillTest extends TestCase
         // scope here would control a path nobody walks. It gets a store grain
         // if a merchant ever needs two Catalogs.
         'facebook_connections',
+
+        // Team grain by design: a team's stores inherit its modules, and TeamModules resolves a store to its team.
+        'team_modules',
     ];
 
     public function test_every_team_scoped_table_has_a_store_id(): void

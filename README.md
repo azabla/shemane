@@ -50,9 +50,9 @@ Whether you are launching a small online shop or building a multi-vendor marketp
 - **PayPal** integration ready to activate
 
 ### Dropshipping
-- First-class **DropXL** supplier integration via `config/dropshipping.php`
-- Supplier order placement queued after successful payment
-- Extensible supplier transformation layer for additional providers
+- Suppliers are modules each team activates and configures for all of its stores: **DropXL** built in, **Printful** as a package
+- Supplier orders queued after successful payment, one per supplier in a cart, and retried safely
+- New suppliers implement `FulfilmentProvider`: see [`docs/MODULE_ARCHITECTURE.md`](docs/MODULE_ARCHITECTURE.md)
 
 ### Product & Order Management
 - Full product catalogue with categories, attributes and images

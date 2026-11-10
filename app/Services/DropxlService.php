@@ -28,6 +28,17 @@ class DropxlService
         ];
     }
 
+    /** @param  array<string, mixed>  $settings  one store's DropXL settings */
+    public function forSettings(array $settings): self
+    {
+        $service = clone $this;
+        $service->apiUrl = rtrim((string) (($settings['api_url'] ?? null) ?: config('services.dropxl.url')), '/');
+        $service->apiKey = (string) ($settings['api_key'] ?? '');
+        $service->headers['Authorization'] = 'Bearer '.$service->apiKey;
+
+        return $service;
+    }
+
     /**
      * Search products from the DropXL API.
      */
@@ -109,6 +120,9 @@ class DropxlService
                 'featured_image' => $dropxlProduct['image_url'] ?? $dropxlProduct['image'] ?? null,
                 'meta_title' => $dropxlProduct['name'],
                 'meta_description' => $dropxlProduct['short_description'] ?? substr($dropxlProduct['description'] ?? '', 0, 255),
+                // What sends an order for this product to DropXL.
+                'supplier_id' => 'dropxl',
+                'supplier_product_id' => isset($dropxlProduct['id']) ? (string) $dropxlProduct['id'] : ($dropxlProduct['sku'] ?? null),
             ];
 
             $product = Product::withoutGlobalScope('store')->updateOrCreate(['store_id' => $storeId, 'slug' => $slug], $productData);

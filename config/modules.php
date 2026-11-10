@@ -1,30 +1,22 @@
 <?php
 
 /*
-|--------------------------------------------------------------------------
-| Modules
-|--------------------------------------------------------------------------
+| Which installed modules boot in this deployment. The manager's provider reads this
+| once, at boot. See docs/MODULE_ARCHITECTURE.md and ADR 0018.
 |
-| Published from liberusoftware/module-manager. See ADR 0011 for what this
-| replaced and what was given up.
-|
-| The shape to know: enablement is deployment configuration, resolved once in
-| the provider's register(), not mutable state in a database table. So the set
-| of registered providers is a fixed function of the deployment — which is what
-| makes a boot reproducible, and is the whole reason the previous DB-backed
-| module system was dropped rather than carried across.
-|
-| Nothing is enabled unless MODULES_ENABLED names it. That default is
-| deliberate and it inverts the old behaviour, which treated an unknown module
-| as enabled — including when the lookup threw. A module runs because somebody
-| decided it should, never because nobody decided otherwise.
-|
+| A module boots when it is required, or its manifest sets default_enabled, or MODULES_ENABLED
+| names it. MODULES_DISABLED overrides the last two, and cannot switch off a required module.
 */
 
 return [
-    'paths' => [base_path('modules')],
+    'paths' => [base_path('modules'), ...array_filter(explode(',', (string) env('MODULES_EXTRA_PATHS', '')))],
 
-    // Installed packages are disabled by default. The host application owns its explicit selection.
+    // One broken optional module is left out and reported rather than taking down every store.
+    'isolate_failures' => true,
+
+    // The core's own classes need these, and module-manager-filament is the page that toggles modules.
+    'required' => ['module-manager', 'module-manager-filament', 'tenancy', 'users-roles'],
+
     'enabled' => array_values(array_filter(explode(',', (string) env('MODULES_ENABLED', '')))),
     'disabled' => array_values(array_filter(explode(',', (string) env('MODULES_DISABLED', '')))),
 

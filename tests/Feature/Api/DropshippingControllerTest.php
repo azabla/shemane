@@ -2,16 +2,18 @@
 
 namespace Tests\Feature\Api;
 
+use App\Integrations\Dropxl\DropxlDefinition;
 use App\Models\User;
-use App\Services\DropshippingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
 use Spatie\Permission\Models\Role;
+use Tests\Feature\Concerns\ActivatesModules;
 use Tests\TestCase;
 
 class DropshippingControllerTest extends TestCase
 {
+    use ActivatesModules;
     use RefreshDatabase;
 
     protected $user;
@@ -28,6 +30,7 @@ class DropshippingControllerTest extends TestCase
         // supplier calls, which still need a caller who is allowed through.
         Role::findOrCreate('super_admin', 'web');
         $this->user = User::factory()->create()->assignRole('super_admin');
+        $this->activateModule(DropxlDefinition::KEY, ['api_key' => 'secret-key', 'api_url' => 'https://api.dropxl.example']);
     }
 
     protected function actingAsUser(): void
@@ -66,7 +69,7 @@ class DropshippingControllerTest extends TestCase
     public function test_check_availability_requires_authentication()
     {
         $response = $this->postJson('/api/dropshipping/check-availability', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'sku' => 'SKU-001',
         ]);
 
@@ -89,7 +92,7 @@ class DropshippingControllerTest extends TestCase
         $this->actingAsUser();
 
         $response = $this->postJson('/api/dropshipping/check-availability', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'sku' => 'SKU-001',
             'quantity' => 'invalid',
         ]);
@@ -107,7 +110,7 @@ class DropshippingControllerTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/dropshipping/check-availability', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'sku' => 'SKU-001',
             'quantity' => 2,
         ]);
@@ -125,7 +128,7 @@ class DropshippingControllerTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/dropshipping/check-availability', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'sku' => 'SKU-001',
         ]);
 
@@ -149,7 +152,7 @@ class DropshippingControllerTest extends TestCase
     public function test_place_order_requires_authentication()
     {
         $response = $this->postJson('/api/dropshipping/place-order', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'order_data' => [],
         ]);
 
@@ -172,7 +175,7 @@ class DropshippingControllerTest extends TestCase
         $this->actingAsUser();
 
         $response = $this->postJson('/api/dropshipping/place-order', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'order_data' => ['some_field' => 'value'],
         ]);
 
@@ -189,7 +192,7 @@ class DropshippingControllerTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/dropshipping/place-order', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'order_data' => [
                 'items' => [
                     ['product_id' => 1, 'quantity' => 1, 'price' => 10.00],
@@ -205,7 +208,7 @@ class DropshippingControllerTest extends TestCase
     public function test_track_order_requires_authentication()
     {
         $response = $this->postJson('/api/dropshipping/track-order', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'order_reference' => 'ORD-123',
         ]);
 
@@ -232,7 +235,7 @@ class DropshippingControllerTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/dropshipping/track-order', [
-            'supplier_id' => 'supplier1',
+            'supplier_id' => 'dropxl',
             'order_reference' => 'ORD-123',
         ]);
 

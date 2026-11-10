@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\Store;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\StorefrontThemes;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
@@ -123,5 +124,20 @@ class AdminChannelDomainTest extends TestCase
 
         Livewire::test(ChannelsRelationManager::class, ['ownerRecord' => $main, 'pageClass' => EditStore::class])
             ->assertTableActionHidden(DeleteAction::class, $main->channels()->firstOrFail());
+    }
+
+    public function test_a_channels_theme_is_chosen_from_the_installed_valid_themes(): void
+    {
+        $root = base_path('tests/Fixtures/theme-packages');
+        $this->app->singleton(StorefrontThemes::class, fn () => new StorefrontThemes($root));
+        $relation = fn () => Livewire::test(ChannelsRelationManager::class, ['ownerRecord' => $this->store, 'pageClass' => EditStore::class]);
+
+        $relation()->callTableAction(CreateAction::class, data: ['name' => 'Bad', 'theme' => 'not-installed'])
+            ->assertHasTableActionErrors(['theme']);
+
+        $relation()->callTableAction(CreateAction::class, data: ['name' => 'Themed', 'theme' => 'fixture-theme'])
+            ->assertHasNoTableActionErrors();
+
+        $this->assertSame('fixture-theme', Channel::query()->where('name', 'Themed')->sole()->theme);
     }
 }

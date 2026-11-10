@@ -143,6 +143,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function fulfilments(): HasMany
+    {
+        return $this->hasMany(OrderFulfilment::class);
+    }
+
     public function statusHistory(): HasMany
     {
         return $this->hasMany(OrderStatusHistory::class);

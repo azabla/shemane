@@ -107,10 +107,15 @@ paths drifting apart is the failure that class exists to prevent.
 implementing `App\Interfaces\PaymentGatewayInterface`. Stripe and PayPal each have a webhook
 controller.
 
-**A product names its supplier.** `products.supplier_id` (e.g. `printful`) sends an order's lines
-for that product to the supplier through `CheckoutService::supplierFor()` and
-`DispatchDropshippingOrder`, each line by its variant's `supplier_variant_id` or SKU, whatever the
-request names. `PrintfulCatalogImporter` mirrors a Printful store as products.
+**A product names its supplier.** `products.supplier_id` sends an order's lines for that product to
+the supplier, whatever the request names. `CheckoutService::suppliersFor()` and
+`assertFulfillable()` run before any charge; `Fulfilment\OrderFulfilments` writes one
+`order_fulfilments` row per supplier and `DispatchDropshippingOrder` submits it through a
+`FulfilmentProvider`. Never add a supplier branch to the core.
+
+**Modules are installed per deployment, offered by the platform and activated per team.** The
+module manager's provider is the only registrar; `TeamModules` holds each team's state, which its stores inherit. See
+[`docs/MODULE_ARCHITECTURE.md`](./docs/MODULE_ARCHITECTURE.md).
 
 **Order state is a transition, not an assignment.** `Order::transitionTo()` writes the history row;
 the `Order::STATUS_*` constants are the vocabulary. Never assign `status` directly.
@@ -124,7 +129,7 @@ whose views override the core's by path; `ProductPresenter` hands views prices a
 decided. See [`docs/THEMES.md`](./docs/THEMES.md).
 
 **Modules live in their own repositories** and are registered by `liberusoftware/module-manager`.
-`modules/` in this host holds the manager only.
+`modules/` holds what Composer installs; `packages/` holds packages not yet in their own repository.
 
 ## Documentation map
 
@@ -134,6 +139,7 @@ decided. See [`docs/THEMES.md`](./docs/THEMES.md).
 | [`docs/CONFORMANCE.md`](./docs/CONFORMANCE.md) | A dated snapshot of the gap between this repo and the reference design. Not edited |
 | [`docs/MIGRATION_PLAN.md`](./docs/MIGRATION_PLAN.md) | Living. Sequences the structural work and records each wave as it lands |
 | [`docs/MODULE_DEVELOPMENT.md`](./docs/MODULE_DEVELOPMENT.md) | Package, repository and namespace naming; the dependency rules |
+| [`docs/MODULE_ARCHITECTURE.md`](./docs/MODULE_ARCHITECTURE.md) | How modules are installed, activated per team and built; what is still open |
 | [`docs/THEMES.md`](./docs/THEMES.md) | Storefront themes: per-channel view overrides, tokens, the presentation contract |
 | [`docs/adr/`](./docs/adr/) | One decision per file |
 | [`docs/agents/`](./docs/agents/) | Issue tracker, triage labels, domain docs |

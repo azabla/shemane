@@ -18,6 +18,7 @@ use App\Filament\App\Resources\Orders\OrderResource;
 use App\Filament\App\Resources\ProductCategories\ProductCategoryResource;
 use App\Filament\App\Resources\ProductOptionGroups\ProductOptionGroupResource;
 use App\Filament\App\Resources\Products\ProductResource;
+use App\Filament\ModulePlugins;
 use App\Http\Middleware\TeamsPermission;
 use App\Models\Menu;
 use App\Models\MenuItem;
@@ -70,6 +71,7 @@ class AdminPanelProvider extends PanelProvider
                         ? url(EditProfile::getUrl())
                         : url($panel->getPath())),
             ])
+            ->plugins(app(ModulePlugins::class)->forPanel('admin'))
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\\Filament\\Admin\\Pages')
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\\Filament\\Admin\\Widgets')

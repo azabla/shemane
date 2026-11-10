@@ -239,20 +239,6 @@
                                 </label>
                             </div>
 
-                            <!-- Dropship Supplier (hidden by default) -->
-                            <div id="dropship-supplier" class="hidden pt-2">
-                                <label for="supplier_id" class="block text-sm font-medium text-ink mb-1.5">Select Supplier</label>
-                                <select
-                                    id="supplier_id"
-                                    name="supplier_id"
-                                    class="w-full px-4 py-2.5 border border-stroke rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
-                                >
-                                    @foreach(config('dropshipping.suppliers') as $supplierId => $supplier)
-                                        <option value="{{ $supplierId }}">{{ $supplier['name'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
                             <!-- Recipient Info (hidden by default) -->
                             <div id="recipient-info" class="hidden space-y-4 pt-2 border-t border-hairline">
                                 <h3 class="text-sm font-semibold text-ink">Recipient Details</h3>
@@ -516,13 +502,11 @@
         // Toggle drop shipping recipient info
         const dropshipCheckbox = document.getElementById('dropship');
         const recipientInfo = document.getElementById('recipient-info');
-        const dropshipSupplier = document.getElementById('dropship-supplier');
 
         if (dropshipCheckbox) {
             dropshipCheckbox.addEventListener('change', function() {
                 const isChecked = this.checked;
                 recipientInfo.classList.toggle('hidden', !isChecked);
-                dropshipSupplier.classList.toggle('hidden', !isChecked);
             });
         }
 

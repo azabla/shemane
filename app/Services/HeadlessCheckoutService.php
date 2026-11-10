@@ -38,6 +38,7 @@ class HeadlessCheckoutService
         $paymentMethod = $input['paymentMethod'] ?? 'stripe';
         $this->checkoutService->assertPurchasable($cart->pluck('product_id'));
         $this->checkoutService->assertInStock($cart);
+        $this->checkoutService->assertFulfillable($cart);
         $this->checkoutService->assertCartPricesCurrent($cart);
         $this->checkoutService->assertGatewayAccepted($paymentMethod);
         $country = strtoupper((string) ($input['country'] ?? ''));
@@ -46,14 +47,9 @@ class HeadlessCheckoutService
             throw new CheckoutException('A drop-shipped order needs a recipient name and email.');
         }
 
-        // The products name their supplier; a client may only pick one for a plain drop-ship, and only a configured one.
-        $requested = $input['supplierId'] ?? 'dropxl';
-        if ($isDropship && ! array_key_exists($requested, config('dropshipping.suppliers', []))) {
-            throw new CheckoutException('Unknown supplier.');
-        }
-        $fromProducts = $this->checkoutService->supplierFor($cart);
-        $supplierId = $fromProducts ?? ($isDropship ? $requested : null);
-        if ($fromProducts !== null && (blank($input['shippingAddress'] ?? null) || blank($input['city'] ?? null) || blank($input['postalCode'] ?? null))) {
+        // The products name their suppliers; the client's input never does.
+        $suppliers = $this->checkoutService->suppliersFor($cart);
+        if ($suppliers !== [] && (blank($input['shippingAddress'] ?? null) || blank($input['city'] ?? null) || blank($input['postalCode'] ?? null))) {
             throw new CheckoutException('This order ships from a supplier, which needs a street address, city and postal code.');
         }
 
@@ -79,7 +75,7 @@ class HeadlessCheckoutService
         $lineItems = $this->checkoutService->orderLines($cart);
 
         $order = null;
-        DB::transaction(function () use (&$order, $lineItems, $user, $input, $paymentMethod, $country, $total, $shippingCost, $carrier, $service, $quoteId, $taxAmount, $taxLines, $discount, $coupon, $isDropship, $vatNumber, $reverseCharge) {
+        DB::transaction(function () use (&$order, $lineItems, $user, $input, $paymentMethod, $country, $total, $shippingCost, $carrier, $service, $quoteId, $taxAmount, $taxLines, $discount, $coupon, $suppliers, $vatNumber, $reverseCharge) {
             // Close the coupon usage-limit race under a row lock before creating the order.
             $this->checkoutService->assertCouponAvailable($coupon['code']);
 
@@ -104,7 +100,7 @@ class HeadlessCheckoutService
                 'tax_lines' => $taxLines,
                 'discount_amount' => $discount,
                 'coupon_code' => $coupon['code'],
-                'is_dropshipped' => $isDropship,
+                'is_dropshipped' => $suppliers !== [],
                 'recipient_name' => $input['recipientName'] ?? null,
                 'recipient_email' => $input['recipientEmail'] ?? null,
                 'gift_message' => $input['giftMessage'] ?? null,
@@ -121,9 +117,7 @@ class HeadlessCheckoutService
 
         // Post-payment fulfilment (shared with the web checkout).
         $this->checkoutService->grantDownloads($order);
-        if ($supplierId !== null) {
-            $this->checkoutService->queueDropship($order, $supplierId);
-        }
+        $this->checkoutService->queueFulfilment($order);
 
         CartItem::where('user_id', $user->id)->delete();
 

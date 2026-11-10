@@ -16,7 +16,8 @@ Every command registered by the application, taken from `app/Console/Commands/`.
 | `vat:oss-report` | EU OSS VAT report. `--from=`, `--to=` (default: current quarter to today), `--csv` |
 | `vat:ec-sales-list` | EC Sales List. Same three options |
 | `tenants:distribution` | Read-only tenant counts, per-table distribution and cross-boundary mismatches — the [#944](https://github.com/liberusoftware/ecommerce-laravel/issues/944) checklist. See below |
-| `module {action} {name?}` | Module scaffolding. **Does nothing useful** — see below |
+| `module:list`, `module:validate`, `module:status`, `module:cache`, `module:clear`, `module:features` | What is installed and booted. `module:validate` fails on any fault; see [`MODULE_ARCHITECTURE.md`](./MODULE_ARCHITECTURE.md) |
+| `fulfilment:sync-tracking` | Asks suppliers for tracking on submitted orders. Scheduled hourly |
 
 ### The tenant-distribution report, and running it without `vendor/`
 
@@ -49,12 +50,6 @@ $schedule->command('shipping:prune-quotes')->daily();
 ```
 
 The other eight run on demand. `segments:calculate`, `metrics:update-customers` and `recommendations:generate` are the ones most likely to want a schedule — nothing currently recomputes any of them.
-
-### `module` is inert
-
-`ModuleCommand` drives `app/Modules/`, which is 1,095 lines of scaffolding that registers zero modules: no class implements `ModuleInterface` and `config/modules.php:66` enables none. The command runs without erroring and achieves nothing.
-
-The whole directory is deleted in wave 0 of the [migration plan](./MIGRATION_PLAN.md#wave-0--make-a-module-loadable-and-make-the-rules-enforceable), replaced by `liberusoftware/module-manager`.
 
 ---
 

@@ -171,7 +171,7 @@ class Product extends Model implements Orderable
         return $this->hasMany(ProductVariant::class)->orderBy('position')->orderBy('id');
     }
 
-    /** Fulfilled by a supplier such as Printful rather than shipped by the merchant. */
+    /** Fulfilled by a supplier rather than shipped by the merchant. */
     public function isDropshipped(): bool
     {
         return filled($this->supplier_id);

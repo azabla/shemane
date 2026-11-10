@@ -1,0 +1,12 @@
+{
+    "name": "fixture-throws",
+    "display_name": "Fixture Throws",
+    "description": "A module whose provider throws.",
+    "version": "1.0.0",
+    "category": "adapter",
+    "provider": "Liberu\\Ecommerce\\FixtureThrows\\FixtureThrowsServiceProvider",
+    "requires": { "php": "^8.5", "laravel": "^13.0", "packages": {} },
+    "capabilities": ["ecommerce.fixture-throws"],
+    "default_enabled": false,
+    "features": ["Throws while registering"]
+}
