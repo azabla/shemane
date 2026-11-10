@@ -45,12 +45,12 @@ class ArchitectureTest extends TestCase
         $found = [];
 
         foreach ($this->phpFiles() as $file) {
-            if (stripos((string) file_get_contents($file->getPathname()), 'printful') !== false) {
+            if (preg_match('/printful|dropxl/i', (string) file_get_contents($file->getPathname()))) {
                 $found[] = $file->getPathname();
             }
         }
 
-        $this->assertSame([], $found, "The core names Printful:\n".implode("\n", $found));
+        $this->assertSame([], $found, "The core names a packaged integration:\n".implode("\n", $found));
     }
 
     public function test_no_debug_helpers_are_left_in_shipped_code(): void

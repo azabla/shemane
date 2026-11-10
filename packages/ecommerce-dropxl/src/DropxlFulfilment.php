@@ -1,10 +1,7 @@
 <?php
 
-namespace App\Integrations\Dropxl;
+namespace Liberu\Ecommerce\Dropxl;
 
-use App\Integrations\SupplierHttp;
-use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Facades\Http;
 use Liberu\Ecommerce\Contracts\Fulfilment\ChecksAvailability;
 use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentLine;
 use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentProvider;
@@ -27,7 +24,7 @@ class DropxlFulfilment implements ChecksAvailability, FulfilmentProvider
 
     public function submit(FulfilmentRequest $request, array $settings): FulfilmentResult
     {
-        $response = SupplierHttp::call($this->client($settings), fn (PendingRequest $r) => $r->post($this->url($settings, '/v1/orders'), [
+        $response = DropxlApi::post($settings, '/v1/orders', [
             'customer' => [
                 'name' => $request->recipient->name,
                 'email' => $request->recipient->email,
@@ -40,7 +37,7 @@ class DropxlFulfilment implements ChecksAvailability, FulfilmentProvider
                 'price' => $line->unitPrice,
             ], $request->lines),
             'reference' => $request->reference,
-        ]));
+        ]);
 
         return $response->successful()
             ? FulfilmentResult::accepted((string) ($response->json('reference') ?? $response->json('id')), (array) $response->json())
@@ -49,7 +46,7 @@ class DropxlFulfilment implements ChecksAvailability, FulfilmentProvider
 
     public function track(string $supplierReference, array $settings): ?TrackingUpdate
     {
-        $response = SupplierHttp::call($this->client($settings), fn (PendingRequest $r) => $r->get($this->url($settings, '/v1/orders/track'), ['reference' => $supplierReference]));
+        $response = DropxlApi::get($settings, '/v1/orders/track', ['reference' => $supplierReference]);
 
         if (! $response->successful()) {
             throw new SupplierUnavailable("DropXL could not report tracking ({$response->status()}).");
@@ -62,24 +59,12 @@ class DropxlFulfilment implements ChecksAvailability, FulfilmentProvider
 
     public function availability(string $sku, int $quantity, array $settings): array
     {
-        $response = SupplierHttp::call($this->client($settings), fn (PendingRequest $r) => $r->get($this->url($settings, '/v1/products/availability'), ['sku' => $sku, 'quantity' => $quantity]));
+        $response = DropxlApi::get($settings, '/v1/products/availability', ['sku' => $sku, 'quantity' => $quantity]);
 
         if (! $response->successful()) {
             throw new SupplierUnavailable("DropXL could not check availability ({$response->status()}).");
         }
 
         return (array) $response->json();
-    }
-
-    /** @param  array<string, mixed>  $settings */
-    private function client(array $settings): PendingRequest
-    {
-        return Http::withToken((string) $settings['api_key'])->acceptJson();
-    }
-
-    /** @param  array<string, mixed>  $settings */
-    private function url(array $settings, string $path): string
-    {
-        return rtrim((string) (($settings['api_url'] ?? null) ?: config('services.dropxl.url')), '/').$path;
     }
 }

@@ -1,33 +1,31 @@
 <?php
 
-namespace Tests\Unit;
+namespace Liberu\Ecommerce\Dropxl\Tests;
 
-use App\Models\Store;
-use App\Services\DropxlService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Liberu\Ecommerce\Dropxl\DropxlCatalog;
 use Tests\TestCase;
 
-class DropxlServiceTest extends TestCase
+/** Searching and importing DropXL's catalogue with one store's settings; the core writes the products. */
+class DropxlCatalogTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected DropxlService $service;
+    protected DropxlCatalog $service;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Point the service at a predictable test URL. Set through config
-        // rather than putenv, because that is the path the service reads —
-        // under `config:cache` an env() lookup resolves to nothing.
-        config([
-            'services.dropxl.url' => 'https://api.dropxl.example',
-            'services.dropxl.key' => 'test-key',
-        ]);
+        $this->service = app(DropxlCatalog::class)->forSettings(['api_key' => 'test-key', 'api_url' => 'https://api.dropxl.example']);
+    }
 
-        $this->service = new DropxlService;
+    private function storeId(): int
+    {
+        return (int) DB::table('stores')->value('id');
     }
 
     // ──────────────────────────────────────────
@@ -149,13 +147,15 @@ class DropxlServiceTest extends TestCase
             'image_url' => null,
         ];
 
-        $result = $this->service->importProduct($dropxlProduct, Store::query()->value('id'));
+        $result = $this->service->importProduct($dropxlProduct, $this->storeId());
 
         $this->assertTrue($result['success']);
-        $this->assertNotNull($result['product']);
         $this->assertDatabaseHas('products', [
+            'id' => $result['product'],
             'name' => 'Test Gadget',
             'price' => 29.99,
+            'supplier_id' => 'dropxl',
+            'supplier_product_id' => 'GAD-001',
         ]);
     }
 
@@ -168,11 +168,20 @@ class DropxlServiceTest extends TestCase
             'category' => 'Gadgets',
         ];
 
-        $result = $this->service->importProduct($dropxlProduct, Store::query()->value('id'));
+        $result = $this->service->importProduct($dropxlProduct, $this->storeId());
 
         $this->assertTrue($result['success']);
         $this->assertDatabaseHas('product_categories', ['name' => 'Gadgets']);
-        $this->assertNotNull($result['product']->category_id);
+        $this->assertNotNull(DB::table('products')->where('id', $result['product'])->value('category_id'));
+    }
+
+    public function test_re_importing_a_product_updates_it_rather_than_adding_another()
+    {
+        $first = $this->service->importProduct(['id' => 7, 'name' => 'Lamp', 'price' => 12], $this->storeId());
+        $again = $this->service->importProduct(['id' => 7, 'name' => 'Lamp', 'price' => 12], $this->storeId());
+
+        $this->assertSame($first['product'], $again['product']);
+        $this->assertSame(1, DB::table('products')->where('supplier_id', 'dropxl')->where('supplier_product_id', '7')->count());
     }
 
     // ──────────────────────────────────────────
@@ -191,7 +200,7 @@ class DropxlServiceTest extends TestCase
             ], 200),
         ]);
 
-        $result = $this->service->importAll(Store::query()->value('id'));
+        $result = $this->service->importAll($this->storeId());
 
         $this->assertTrue($result['success']);
         $this->assertEquals(2, $result['imported']);
@@ -204,7 +213,7 @@ class DropxlServiceTest extends TestCase
             'https://api.dropxl.example/v1/products*' => Http::response('Bad Request', 400),
         ]);
 
-        $result = $this->service->importAll(Store::query()->value('id'));
+        $result = $this->service->importAll($this->storeId());
 
         $this->assertFalse($result['success']);
     }
@@ -224,7 +233,7 @@ class DropxlServiceTest extends TestCase
             ], 200),
         ]);
 
-        $result = $this->service->importByCategory(Store::query()->value('id'), 'cat-99', 'widget');
+        $result = $this->service->importByCategory($this->storeId(), 'cat-99', 'widget');
 
         $this->assertTrue($result['success']);
         $this->assertEquals(1, $result['imported']);
@@ -244,7 +253,7 @@ class DropxlServiceTest extends TestCase
             'https://api.dropxl.example/v1/products*' => Http::response('Not Found', 404),
         ]);
 
-        $result = $this->service->importByCategory(Store::query()->value('id'), 'cat-99');
+        $result = $this->service->importByCategory($this->storeId(), 'cat-99');
 
         $this->assertFalse($result['success']);
     }

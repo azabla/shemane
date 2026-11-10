@@ -6,10 +6,10 @@ use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
-use App\Services\DropxlService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
+use Liberu\Ecommerce\Contracts\Catalog\ImportedProduct;
+use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
 use Tests\TestCase;
 
 /**
@@ -115,15 +115,13 @@ class CommerceRulesParityTest extends TestCase
 
     public function test_a_supplier_import_never_touches_another_stores_product(): void
     {
-        Http::fake(['*' => Http::response([])]);
         $theirs = Store::factory()->create();
         $mine = Store::factory()->create();
         $existing = Product::factory()->create(['name' => 'Garden Chair', 'price' => 99]);
         $existing->forceFill(['store_id' => $theirs->id])->save();
 
-        $result = app(DropxlService::class)->importProduct(['name' => 'Garden Chair', 'price' => 10, 'category' => 'Outdoor'], $mine->id);
+        app(ProductImporter::class)->import($mine->id, new ImportedProduct('fixture', 'chair-1', 'Garden Chair', 10.0, categoryName: 'Outdoor'));
 
-        $this->assertTrue($result['success']);
         $this->assertEquals(99, $existing->fresh()->price);
         $imported = Product::withoutGlobalScopes()->where('store_id', $mine->id)->sole();
         $this->assertEquals(10, $imported->price);

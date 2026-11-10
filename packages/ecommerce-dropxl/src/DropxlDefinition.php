@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Integrations\Dropxl;
+namespace Liberu\Ecommerce\Dropxl;
 
 use Liberu\Ecommerce\Contracts\Modules\ModuleDefinition;
+use Liberu\Ecommerce\Contracts\Modules\ProvidesPanelPlugins;
 use Liberu\Ecommerce\Contracts\Modules\SettingField;
+use Liberu\Ecommerce\Dropxl\Filament\DropxlPlugin;
 
-class DropxlDefinition implements ModuleDefinition
+class DropxlDefinition implements ModuleDefinition, ProvidesPanelPlugins
 {
     public const KEY = 'ecommerce-dropxl';
 
@@ -35,5 +37,10 @@ class DropxlDefinition implements ModuleDefinition
     public function validateSettings(array $settings): array
     {
         return [];
+    }
+
+    public function panelPlugins(string $panel): array
+    {
+        return $panel === 'admin' ? [new DropxlPlugin] : [];
     }
 }

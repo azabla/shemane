@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f6cbba6c10c427e8e99ec66089d7f3ed",
+    "content-hash": "0f7e7561bba4fb85ac6809b48b38befc",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5267,11 +5267,11 @@
         },
         {
             "name": "liberusoftware/ecommerce-contracts",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "dist": {
                 "type": "path",
                 "url": "packages/ecommerce-contracts",
-                "reference": "79d538705b6ee2884c46e598f680d56e4e010e55"
+                "reference": "0948baac50747f34e10b29e602c7331911cb576f"
             },
             "require": {
                 "php": "^8.5"
@@ -5286,6 +5286,86 @@
                 "MIT"
             ],
             "description": "The stable boundary between the Liberu ecommerce core and independently distributed modules.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "liberusoftware/ecommerce-dropxl",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/ecommerce-dropxl",
+                "reference": "67b4e7e1941320f647c5a1c07a1717a6dc14ef85"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/http": "^13.0",
+                "illuminate/support": "^13.0",
+                "liberusoftware/ecommerce-contracts": "^1.1",
+                "php": "^8.5"
+            },
+            "type": "liberu-module",
+            "extra": {
+                "liberu": {
+                    "name": "ecommerce-dropxl"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Dropxl\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Dropxl\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "DropXL dropshipping fulfilment and catalogue import for the Liberu ecommerce platform.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "liberusoftware/ecommerce-printful",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/ecommerce-printful",
+                "reference": "698e9753008678b92b4c9e595ba91ab2aa65e559"
+            },
+            "require": {
+                "illuminate/console": "^13.0",
+                "illuminate/http": "^13.0",
+                "illuminate/support": "^13.0",
+                "liberusoftware/ecommerce-contracts": "^1.0",
+                "php": "^8.5"
+            },
+            "type": "liberu-module",
+            "extra": {
+                "liberu": {
+                    "name": "ecommerce-printful"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Printful\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Printful\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Printful print-on-demand fulfilment and catalogue import for the Liberu ecommerce platform.",
             "transport-options": {
                 "symlink": false,
                 "relative": true

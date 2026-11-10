@@ -4,17 +4,15 @@ namespace App\Providers;
 
 use App\Console\Commands\Modules\ThemeListCommand;
 use App\Console\Commands\Modules\ThemeValidateCommand;
-use App\Integrations\Dropxl\DropxlDefinition;
-use App\Integrations\Dropxl\DropxlFulfilment;
 use App\Models\Store;
 use App\Services\Fulfilment\FulfilmentProviders;
 use App\Services\Fulfilment\SupplierProductImporter;
+use App\Support\Modules\Stores;
 use App\Support\Modules\TeamModules;
 use Illuminate\Support\ServiceProvider;
 use Liberu\Ecommerce\Contracts\Catalog\ProductImporter;
-use Liberu\Ecommerce\Contracts\Fulfilment\FulfilmentProvider;
-use Liberu\Ecommerce\Contracts\Modules\ModuleDefinition;
 use Liberu\Ecommerce\Contracts\Modules\ModuleState;
+use Liberu\Ecommerce\Contracts\Stores\StoreDirectory;
 
 /**
  * The host's side of modules: team activation and the contracts modules plug into. The
@@ -28,7 +26,7 @@ class ModuleServiceProvider extends ServiceProvider
         $this->app->alias(TeamModules::class, ModuleState::class);
         $this->app->scoped(FulfilmentProviders::class);
         $this->app->bind(ProductImporter::class, SupplierProductImporter::class);
-        $this->registerBuiltInIntegrations();
+        $this->app->bind(StoreDirectory::class, Stores::class);
     }
 
     public function boot(): void
@@ -38,12 +36,5 @@ class ModuleServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([ThemeListCommand::class, ThemeValidateCommand::class]);
         }
-    }
-
-    /** An integration still in the core, offered and activated exactly as a package would be. */
-    private function registerBuiltInIntegrations(): void
-    {
-        $this->app->tag(DropxlDefinition::class, ModuleDefinition::class);
-        $this->app->tag(DropxlFulfilment::class, FulfilmentProvider::class);
     }
 }

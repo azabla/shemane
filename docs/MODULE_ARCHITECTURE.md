@@ -9,7 +9,7 @@ How modules work in this platform, how to build one, and what is still open. Pat
 | 1. Make the module manager real | Done ([ADR 0014](./adr/0014-host-module-registration.md), then the manager's own provider from 1.7.0, [ADR 0018](./adr/0018-the-managers-provider-registers-modules.md)) |
 | 2. Activation lifecycle | Done per store ([ADR 0015](./adr/0015-per-store-module-activation.md)), then per team ([ADR 0019](./adr/0019-team-module-activation.md)) |
 | 3. Stable contracts | Done ([ADR 0016](./adr/0016-ecommerce-contracts-package.md)) |
-| 4. Printful and DropXL | Boundary done, Printful extracted to a package. DropXL stays built in (§10) |
+| 4. Printful and DropXL | Both extracted to packages, installed by the core as feature modules, off by default (§10) |
 | 5. Distribution and CI | CI done. The publisher stays, limited to the canonical repository; making it fail safely is open (§11) |
 | 6. Themes | Done. See [`THEMES.md`](./THEMES.md) |
 
@@ -100,7 +100,7 @@ module-ecommerce-acme/                 liberusoftware/ecommerce-acme
 }
 ```
 
-`module.json`. Every key shown is required except `$schema` and `requires.capabilities`:
+`module.json`. Every key shown is required except `$schema`, `module_type` and `requires.capabilities`:
 
 ```json
 {
@@ -109,6 +109,7 @@ module-ecommerce-acme/                 liberusoftware/ecommerce-acme
     "description": "Acme fulfilment.",
     "version": "1.0.0",
     "category": "adapter",
+    "module_type": "feature",
     "provider": "Liberu\\Ecommerce\\Acme\\AcmeServiceProvider",
     "requires": {
         "php": "^8.5",
@@ -120,6 +121,8 @@ module-ecommerce-acme/                 liberusoftware/ecommerce-acme
     "features": ["Sends a store's Acme lines to its Acme account"]
 }
 ```
+
+`module_type` is what puts a module on **Operations → Modules**. `feature` is something an administrator switches on and off, such as an integration. Leave it out, or set `infrastructure`, for what the application is built on, such as the module manager, tenancy and users and roles; those are never listed there. Requiring the package is not enough, and its vendor name plays no part.
 
 The rules `module:validate` enforces:
 
@@ -325,7 +328,7 @@ A web process able to write code turns any admin compromise into code execution.
 | Job | Fails when |
 | --- | --- |
 | `core` | The publisher's repository guard is removed; an installed module or a `composer.json` theme is committed; a manifest or theme is invalid; anything optional boots by default |
-| `installed-module` | The fixture or Printful fails a real install, `module:validate`, the composition test or its own tests |
+| `installed-module` | The fixture, Printful or DropXL fails a real install, `module:validate`, the composition test or its own tests |
 | `installed-theme` | The fixture theme fails a real install or Vite build, or loses its own classes |
 | `mysql` | Module and commerce tests fail on MySQL 8.4 |
 | `image` | The built image lacks a required module, or `module:validate` fails in it |
@@ -336,9 +339,11 @@ A new module's own repository keeps the three thin workflows in [`MODULE_DEVELOP
 
 ## 10. Printful and DropXL
 
-**Printful** is `packages/ecommerce-printful`, a complete `liberu-module` package requiring only the contracts. `jmhclothing` and `coldphysique` use it. It is a path repository because publishing needs approval; to split it, move the directory to its own repository unchanged and replace the path repository with a version.
+**Printful** is `packages/ecommerce-printful` and **DropXL** is `packages/ecommerce-dropxl`. Each is a complete `liberu-module` feature package requiring only the contracts, and the core's `composer.json` requires both, so every deployment has them installed and off until enabled on **Operations → Modules**. They are path repositories because publishing needs approval; to split one, move the directory to its own repository unchanged and replace the path repository with a version.
 
-**DropXL stays built in**, at `app/Integrations/Dropxl`, activated per team through the same contracts. In the site repositories, only tests inherited from the core mention it, and no site's themes or seeders do, and nothing confirms its API URL is real. Extracting it would prove nothing. Decide whether to keep it once someone needs it.
+DropXL's **Import from DropXL** page is a Filament plugin its definition returns for the `admin` panel. It lists stores through the contracts' `StoreDirectory`, allows those the `ecommerce.catalogue.manage` gate allows, and writes products through `ProductImporter`. Imported products are therefore matched on DropXL's product id and not stock-tracked, where the built-in service matched on slug and copied DropXL's stock count; availability is DropXL's to answer at checkout. Nothing confirms DropXL's API is real, so check it against an account before relying on it.
+
+Disabled, neither registers its provider: no fulfilment, no stock checks, no `printful:import-products`, no DropXL page or menu entry, and neither appears on **Integrations**. The packages stay installed.
 
 **What changes when a site merges this.** The sites are not modified by this work. On their next merge from the core:
 
@@ -346,7 +351,8 @@ A new module's own repository keeps the three thin workflows in [`MODULE_DEVELOP
 | --- | --- |
 | New `tenancy`, contracts and `dont-discover` entries | Resolve `composer.lock` by re-running Composer |
 | Supplier credentials leave `.env` | Enter them per team on **Integrations**. `PRINTFUL_API_TOKEN` and `DROPXL_API_KEY` are no longer used |
-| A site using Printful | `composer require liberusoftware/ecommerce-printful`, add `ecommerce-printful` to `MODULES_ENABLED`, then allow and enable it. **Until then its products show as sold out** |
+| A site using Printful or DropXL | Enable it on **Operations → Modules**, then offer it on **Team integrations** and enable it on **Integrations**. **Until then its products show as sold out** |
+| `services.dropxl` | Moves to `dropxl.url`, still read from `DROPXL_API_URL` |
 | `printful:import-products` | Now needs `--store=<id>` on a multi-store deployment |
 | `dropshipping.suppliers.printful.categories` | Moves to `printful.categories` |
 | Site tests with `supplier_id => 'printful'` | Must activate the module in `setUp`, or checkout rightly refuses them |
@@ -362,7 +368,7 @@ A new module's own repository keeps the three thin workflows in [`MODULE_DEVELOP
 
 **Decided: the publisher stays, and fails safely.** A run refuses, publishing nothing, when the destination package repository has changes since this repository's last sync to it, whether direct commits or another product's sync.
 
-Independently of that, `ecommerce-contracts` and `ecommerce-printful` are outside the publisher's paths and are still to be published from their own repositories, on bare tags.
+Independently of that, `ecommerce-contracts`, `ecommerce-printful` and `ecommerce-dropxl` are outside the publisher's paths and are still to be published from their own repositories, on bare tags.
 
 ## 12. Open decisions and limits
 
@@ -370,7 +376,7 @@ Independently of that, `ecommerce-contracts` and `ecommerce-printful` are outsid
 
 | Decision | Recommendation | Who |
 | --- | --- | --- |
-| Publish `ecommerce-contracts` and `ecommerce-printful`, and public or private? | Public on Packagist | You, with the maintainer |
+| Publish `ecommerce-contracts`, `ecommerce-printful` and `ecommerce-dropxl`, and public or private? | Public on Packagist | You, with the maintainer |
 | One package per integration, against the fleet's four ([ADR 0016](./adr/0016-ecommerce-contracts-package.md)) | One. Needs a catalogue entry in `ECOMMERCE.md` for both packages | Upstream maintainer |
 | Do the wave `module-ecommerce-*` packages stay the plan? | Pause them. They have their own data model, and `module-ecommerce-dropshipping`'s manifest is invalid | Upstream maintainer |
 | Move to manager `1.7.0` | Done on `feat/module-manager-1.7`: its provider isolates per module, and ADR 0018 retires the host's copy | — |

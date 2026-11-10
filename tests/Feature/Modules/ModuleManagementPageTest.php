@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Liberu\Foundation\ModuleManager\Cache\RegistryCache;
 use Liberu\Foundation\ModuleManager\ModuleActivations;
 use Liberu\Foundation\ModuleManager\ModuleLoader;
+use Liberu\Foundation\ModuleManager\ModuleManagement as Modules;
 use Liberu\Foundation\ModuleManager\ModuleValidator;
 use Liberu\Foundation\ModuleManagerFilament\Pages\ModuleManagement;
 use Livewire\Livewire;
@@ -53,8 +54,13 @@ class ModuleManagementPageTest extends TestCase
         Livewire::test(ModuleManagement::class)
             ->assertTableColumnStateSet('version', ltrim((string) InstalledVersions::getPrettyVersion('liberusoftware/ecommerce-fixture-supplier'), 'v'), self::MODULE)
             ->assertTableColumnStateSet('status', 'enabled', self::MODULE)
-            ->assertTableColumnStateSet('version', '1.8.0', 'module-manager')
-            ->assertDontSee(['Stores allowed', 'Choose stores', 'built in', 'not installed', 'ecommerce-printful']);
+            ->assertTableColumnStateSet('version', '0.1.0', 'ecommerce-dropxl')
+            ->assertTableColumnStateSet('status', 'disabled', 'ecommerce-dropxl')
+            ->assertTableActionVisible('enable', 'ecommerce-dropxl')
+            ->assertTableColumnStateSet('version', '0.1.0', 'ecommerce-printful')
+            ->assertTableColumnStateSet('status', 'disabled', 'ecommerce-printful')
+            ->assertTableActionVisible('enable', 'ecommerce-printful')
+            ->assertDontSee(['Stores allowed', 'Choose stores', 'built in', 'not installed']);
     }
 
     public function test_disabling_stops_the_module_registering_and_enabling_brings_it_back(): void
@@ -81,10 +87,11 @@ class ModuleManagementPageTest extends TestCase
     {
         $this->platformAdmin();
 
-        Livewire::test(ModuleManagement::class)
-            ->assertTableActionHidden('disable', 'tenancy')
-            ->assertTableActionHidden('disable', 'module-manager')
-            ->assertTableActionHidden('disable', 'module-manager-filament');
+        $modules = app(Modules::class)->modules();
+
+        foreach (['tenancy', 'users-roles', 'module-manager', 'module-manager-filament'] as $infrastructure) {
+            $this->assertTrue(! isset($modules[$infrastructure]) || $modules[$infrastructure]['locked'] !== null, "{$infrastructure} can be switched off");
+        }
     }
 
     public function test_only_staff_who_manage_modules_can_reach_it(): void

@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Filament\Admin\Pages;
+namespace Liberu\Ecommerce\Dropxl\Filament;
 
-use App\Integrations\Dropxl\DropxlDefinition;
-use App\Models\Store;
-use App\Services\DropxlService;
-use App\Support\Modules\TeamModules;
-use App\Support\StoreAccess;
-use App\Support\TeamPermission;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Gate;
+use Liberu\Ecommerce\Contracts\Modules\Abilities;
+use Liberu\Ecommerce\Contracts\Modules\ModuleState;
+use Liberu\Ecommerce\Contracts\Stores\StoreDirectory;
+use Liberu\Ecommerce\Dropxl\DropxlCatalog;
+use Liberu\Ecommerce\Dropxl\DropxlDefinition;
 
 class DropxlImport extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-down-tray';
 
-    protected string $view = 'filament.admin.pages.dropxl-import';
+    protected string $view = 'ecommerce-dropxl::dropxl-import';
 
     protected static ?int $navigationSort = 9;
 
@@ -46,13 +46,23 @@ class DropxlImport extends Page
 
     public static function canAccess(): bool
     {
-        return StoreAccess::allows(auth()->user(), TeamPermission::CATALOGUE_MANAGE, null, 'create_product');
+        if (auth()->user() === null) {
+            return false;
+        }
+
+        foreach (array_keys(app(StoreDirectory::class)->names()) as $storeId) {
+            if (Gate::allows(Abilities::MANAGE_CATALOGUE, $storeId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    /** @return array<int, string> */
+    /** @return array<int, string> the stores whose catalogue this user manages */
     public function getStores(): array
     {
-        return Store::query()->orderBy('name')->pluck('name', 'id')->all();
+        return array_filter(app(StoreDirectory::class)->names(), fn (int $storeId) => Gate::allows(Abilities::MANAGE_CATALOGUE, $storeId), ARRAY_FILTER_USE_KEY);
     }
 
     private function targetStore(): ?int
@@ -72,9 +82,9 @@ class DropxlImport extends Page
     }
 
     /** The chosen store's own DropXL account; null, with a notice, when it has none active. */
-    private function service(): ?DropxlService
+    private function service(): ?DropxlCatalog
     {
-        $modules = app(TeamModules::class);
+        $modules = app(ModuleState::class);
 
         if ($this->targetStore() === null) {
             return null;
@@ -86,7 +96,7 @@ class DropxlImport extends Page
             return null;
         }
 
-        return app(DropxlService::class)->forSettings($modules->settings(DropxlDefinition::KEY, $this->storeId));
+        return app(DropxlCatalog::class)->forSettings($modules->settings(DropxlDefinition::KEY, $this->storeId));
     }
 
     /**

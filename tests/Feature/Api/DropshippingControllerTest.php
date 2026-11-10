@@ -2,21 +2,29 @@
 
 namespace Tests\Feature\Api;
 
-use App\Integrations\Dropxl\DropxlDefinition;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
+use Liberu\Ecommerce\Dropxl\DropxlDefinition;
 use Spatie\Permission\Models\Role;
 use Tests\Feature\Concerns\ActivatesModules;
+use Tests\Feature\Modules\Concerns\InstallsFixtureModules;
 use Tests\TestCase;
 
 class DropshippingControllerTest extends TestCase
 {
     use ActivatesModules;
+    use InstallsFixtureModules;
     use RefreshDatabase;
 
     protected $user;
+
+    /** @return list<string> */
+    protected function fixtureModulesEnabled(): array
+    {
+        return ['ecommerce-dropxl'];
+    }
 
     protected function setUp(): void
     {
