@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f6cbba6c10c427e8e99ec66089d7f3ed",
+    "content-hash": "cc19121b76134d30953933da7babd0eb",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5267,11 +5267,11 @@
         },
         {
             "name": "liberusoftware/ecommerce-contracts",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "dist": {
                 "type": "path",
                 "url": "packages/ecommerce-contracts",
-                "reference": "79d538705b6ee2884c46e598f680d56e4e010e55"
+                "reference": "0948baac50747f34e10b29e602c7331911cb576f"
             },
             "require": {
                 "php": "^8.5"
@@ -5292,17 +5292,97 @@
             }
         },
         {
+            "name": "liberusoftware/ecommerce-dropxl",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/ecommerce-dropxl",
+                "reference": "67b4e7e1941320f647c5a1c07a1717a6dc14ef85"
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "illuminate/http": "^13.0",
+                "illuminate/support": "^13.0",
+                "liberusoftware/ecommerce-contracts": "^1.1",
+                "php": "^8.5"
+            },
+            "type": "liberu-module",
+            "extra": {
+                "liberu": {
+                    "name": "ecommerce-dropxl"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Dropxl\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Dropxl\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "DropXL dropshipping fulfilment and catalogue import for the Liberu ecommerce platform.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "liberusoftware/ecommerce-printful",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/ecommerce-printful",
+                "reference": "698e9753008678b92b4c9e595ba91ab2aa65e559"
+            },
+            "require": {
+                "illuminate/console": "^13.0",
+                "illuminate/http": "^13.0",
+                "illuminate/support": "^13.0",
+                "liberusoftware/ecommerce-contracts": "^1.0",
+                "php": "^8.5"
+            },
+            "type": "liberu-module",
+            "extra": {
+                "liberu": {
+                    "name": "ecommerce-printful"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Printful\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Liberu\\Ecommerce\\Printful\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Printful print-on-demand fulfilment and catalogue import for the Liberu ecommerce platform.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
             "name": "liberusoftware/module-manager",
-            "version": "1.8.0",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberusoftware/module-module-manager.git",
-                "reference": "91c0b069d55505eedf1861bf629b7cd5eec13601"
+                "reference": "372c9fc3cf688967bed7ffb315727cd7a7b4125e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liberusoftware/module-module-manager/zipball/91c0b069d55505eedf1861bf629b7cd5eec13601",
-                "reference": "91c0b069d55505eedf1861bf629b7cd5eec13601",
+                "url": "https://api.github.com/repos/liberusoftware/module-module-manager/zipball/372c9fc3cf688967bed7ffb315727cd7a7b4125e",
+                "reference": "372c9fc3cf688967bed7ffb315727cd7a7b4125e",
                 "shasum": ""
             },
             "require": {
@@ -5334,28 +5414,28 @@
             "description": "Deterministic manifest discovery and runtime enablement for Liberu modules.",
             "support": {
                 "issues": "https://github.com/liberusoftware/module-module-manager/issues",
-                "source": "https://github.com/liberusoftware/module-module-manager/tree/1.8.0"
+                "source": "https://github.com/liberusoftware/module-module-manager/tree/1.9.0"
             },
-            "time": "2026-11-09T23:46:56+00:00",
-            "published-time": "2026-11-09T23:47:08+00:00"
+            "time": "2026-11-10T16:14:46+00:00",
+            "published-time": "2026-11-10T16:15:10+00:00"
         },
         {
             "name": "liberusoftware/module-manager-filament",
-            "version": "1.8.0",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberusoftware/module-module-manager-filament.git",
-                "reference": "44a5fd16a0f051342e8de6427637c21c554a2a16"
+                "reference": "f4973b0bbd5ba8909f576390de0e8f273073d68f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liberusoftware/module-module-manager-filament/zipball/44a5fd16a0f051342e8de6427637c21c554a2a16",
-                "reference": "44a5fd16a0f051342e8de6427637c21c554a2a16",
+                "url": "https://api.github.com/repos/liberusoftware/module-module-manager-filament/zipball/f4973b0bbd5ba8909f576390de0e8f273073d68f",
+                "reference": "f4973b0bbd5ba8909f576390de0e8f273073d68f",
                 "shasum": ""
             },
             "require": {
                 "filament/filament": "^5.11.0",
-                "liberusoftware/module-manager": "^1.8",
+                "liberusoftware/module-manager": "^1.9",
                 "php": "^8.5"
             },
             "require-dev": {
@@ -5384,10 +5464,10 @@
             "description": "Filament operations presentation adapter for the Liberu Module Manager.",
             "support": {
                 "issues": "https://github.com/liberusoftware/module-module-manager-filament/issues",
-                "source": "https://github.com/liberusoftware/module-module-manager-filament/tree/1.8.0"
+                "source": "https://github.com/liberusoftware/module-module-manager-filament/tree/1.9.0"
             },
-            "time": "2026-11-10T00:23:39+00:00",
-            "published-time": "2026-11-10T00:25:27+00:00"
+            "time": "2026-11-10T20:20:01+00:00",
+            "published-time": "2026-11-10T20:20:50+00:00"
         },
         {
             "name": "liberusoftware/tenancy",

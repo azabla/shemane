@@ -4,6 +4,7 @@
     "description": "Acceptance fixture for the module system.",
     "version": "1.0.0",
     "category": "adapter",
+    "module_type": "feature",
     "provider": "Liberu\\Ecommerce\\FixtureSupplier\\FixtureSupplierServiceProvider",
     "requires": {
         "php": "^8.5",

@@ -5,6 +5,7 @@
     "description": "Printful print-on-demand fulfilment and catalogue import, activated per store.",
     "version": "0.1.0",
     "category": "adapter",
+    "module_type": "feature",
     "provider": "Liberu\\Ecommerce\\Printful\\PrintfulServiceProvider",
     "requires": {
         "php": "^8.5",

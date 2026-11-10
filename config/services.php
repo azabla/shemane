@@ -54,9 +54,4 @@ return [
         ],
     ],
 
-    'dropxl' => [
-        'url' => env('DROPXL_API_URL', 'https://api.dropxl.com'),
-        'key' => env('DROPXL_API_KEY', ''),
-    ],
-
 ];

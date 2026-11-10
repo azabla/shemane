@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Liberu\Foundation\ModuleManager\Cache\RegistryCache;
 use Liberu\Foundation\ModuleManager\ModuleActivations;
 use Liberu\Foundation\ModuleManager\ModuleLoader;
+use Liberu\Foundation\ModuleManager\ModuleManagement as Modules;
 use Liberu\Foundation\ModuleManager\ModuleValidator;
 use Liberu\Foundation\ModuleManagerFilament\Pages\ModuleManagement;
 use Livewire\Livewire;
@@ -53,8 +54,17 @@ class ModuleManagementPageTest extends TestCase
         Livewire::test(ModuleManagement::class)
             ->assertTableColumnStateSet('version', ltrim((string) InstalledVersions::getPrettyVersion('liberusoftware/ecommerce-fixture-supplier'), 'v'), self::MODULE)
             ->assertTableColumnStateSet('status', 'enabled', self::MODULE)
-            ->assertTableColumnStateSet('version', '1.8.0', 'module-manager')
-            ->assertDontSee(['Stores allowed', 'Choose stores', 'built in', 'not installed', 'ecommerce-printful']);
+            ->assertTableColumnStateSet('version', '0.1.0', 'ecommerce-dropxl')
+            ->assertTableColumnStateSet('status', 'disabled', 'ecommerce-dropxl')
+            ->assertTableActionVisible('enable', 'ecommerce-dropxl')
+            ->assertTableColumnStateSet('version', '0.1.0', 'ecommerce-printful')
+            ->assertTableColumnStateSet('status', 'disabled', 'ecommerce-printful')
+            ->assertTableActionVisible('enable', 'ecommerce-printful')
+            ->assertSee([
+                json_decode((string) file_get_contents(base_path('modules/ecommerce-dropxl/module.json')), true)['description'],
+                json_decode((string) file_get_contents(base_path('modules/ecommerce-printful/module.json')), true)['description'],
+            ])
+            ->assertDontSee(['Stores allowed', 'Choose stores', 'built in', 'not installed', 'Team Tenancy', 'Users Roles', 'Module Manager Administration']);
     }
 
     public function test_disabling_stops_the_module_registering_and_enabling_brings_it_back(): void
@@ -77,14 +87,17 @@ class ModuleManagementPageTest extends TestCase
         $this->assertTrue($this->nextBootIncludes(self::MODULE));
     }
 
-    public function test_the_modules_an_application_cannot_run_without_cannot_be_turned_off(): void
+    public function test_only_feature_modules_are_offered_and_infrastructure_stays_hidden(): void
     {
         $this->platformAdmin();
 
-        Livewire::test(ModuleManagement::class)
-            ->assertTableActionHidden('disable', 'tenancy')
-            ->assertTableActionHidden('disable', 'module-manager')
-            ->assertTableActionHidden('disable', 'module-manager-filament');
+        $modules = app(Modules::class)->modules();
+
+        $this->assertSame(['ecommerce-dropxl', 'ecommerce-printful', self::MODULE], array_keys($modules));
+
+        foreach (['tenancy', 'users-roles', 'module-manager', 'module-manager-filament'] as $infrastructure) {
+            $this->assertArrayNotHasKey($infrastructure, $modules);
+        }
     }
 
     public function test_only_staff_who_manage_modules_can_reach_it(): void

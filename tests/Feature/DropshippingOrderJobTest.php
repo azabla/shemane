@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Integrations\Dropxl\DropxlDefinition;
 use App\Jobs\DispatchDropshippingOrder;
 use App\Models\Order;
 use App\Models\Product;
@@ -11,14 +10,23 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use Liberu\Ecommerce\Dropxl\DropxlDefinition;
 use Tests\Feature\Concerns\ActivatesModules;
+use Tests\Feature\Modules\Concerns\InstallsFixtureModules;
 use Tests\TestCase;
 
-/** The built-in DropXL integration, through the same boundary a package uses. */
+/** The DropXL module, installed with Composer and enabled, through the fulfilment boundary. */
 class DropshippingOrderJobTest extends TestCase
 {
     use ActivatesModules;
+    use InstallsFixtureModules;
     use RefreshDatabase;
+
+    /** @return list<string> */
+    protected function fixtureModulesEnabled(): array
+    {
+        return ['ecommerce-dropxl'];
+    }
 
     protected function setUp(): void
     {

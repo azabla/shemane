@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Filament\App\Resources\Orders\Pages\EditOrder;
-use App\Integrations\Dropxl\DropxlDefinition;
 use App\Interfaces\PaymentGatewayInterface;
 use App\Jobs\DispatchDropshippingOrder;
 use App\Models\CartItem;
@@ -23,6 +22,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
+use Liberu\Ecommerce\Dropxl\DropxlDefinition;
 use Liberu\Ecommerce\FixtureSupplier\FixtureFulfilment;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
@@ -46,6 +46,12 @@ class SupplierFulfilmentTest extends TestCase
     private object $gateway;
 
     private Store $store;
+
+    /** @return list<string> */
+    protected function fixtureModulesEnabled(): array
+    {
+        return ['fixture-supplier', 'ecommerce-dropxl'];
+    }
 
     protected function setUp(): void
     {

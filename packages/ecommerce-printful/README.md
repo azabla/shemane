@@ -6,7 +6,7 @@ Printful fulfilment and catalogue import for the Liberu ecommerce platform. Inst
 composer require liberusoftware/ecommerce-printful
 ```
 
-Add `ecommerce-printful` to `MODULES_ENABLED` and deploy. Then a platform admin makes it available on **Settings → Modules**, and the merchant enters their API token and enables it on **Integrations**.
+It is a feature module, off until a platform admin enables it on **Operations → Modules**. Then the platform makes it available to teams on **Team integrations**, and the merchant enters their API token and enables it on **Integrations**. Disabling it on **Modules** removes its fulfilment and import command from the next request; the Composer package stays installed.
 
 A product whose `supplier_id` is `printful` then sends its lines to that store's Printful account. Tracking is recorded by the core's `fulfilment:sync-tracking`.
 
