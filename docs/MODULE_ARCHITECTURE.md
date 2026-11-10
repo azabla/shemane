@@ -41,11 +41,12 @@ A store's module is **active** only when steps 5 to 8 all hold. Steps 2 and 5 ne
 
 ## 2. Required and optional modules
 
-`config('modules.required')` lists what the core's own classes need, and nothing else:
+`config('modules.required')` lists what the core's own classes need, plus the page that turns modules on and off:
 
 | Module | Why it is required |
 | --- | --- |
 | `module-manager` | Its classes do the discovery and validation |
+| `module-manager-filament` | It provides **Operations → Modules**; switched off, nothing could switch modules back on from the panel |
 | `tenancy` | `App\Traits\IsTenantModel` uses its `BelongsToTeam` |
 | `users-roles` | `App\Models\User` extends its model |
 

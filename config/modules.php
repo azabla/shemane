@@ -14,8 +14,8 @@ return [
     // One broken optional module is left out and reported rather than taking down every store.
     'isolate_failures' => true,
 
-    // The core's own classes need these, so a deployment cannot run without them.
-    'required' => ['module-manager', 'tenancy', 'users-roles'],
+    // The core's own classes need these, and module-manager-filament is the page that toggles modules.
+    'required' => ['module-manager', 'module-manager-filament', 'tenancy', 'users-roles'],
 
     'enabled' => array_values(array_filter(explode(',', (string) env('MODULES_ENABLED', '')))),
     'disabled' => array_values(array_filter(explode(',', (string) env('MODULES_DISABLED', '')))),
