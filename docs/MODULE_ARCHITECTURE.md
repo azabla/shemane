@@ -353,13 +353,13 @@ A new module's own repository keeps the three thin workflows in [`MODULE_DEVELOP
 
 ## 11. The package publisher
 
-`.github/workflows/sync-packages.yml` copies `modules/*` and `themes/*` from a host into shared repositories, tags them and updates Packagist. It is unchanged, apart from the guard limiting it to `liberusoftware/ecommerce-laravel`, which `modules.yml` now protects.
+`.github/workflows/sync-packages.yml` copies `modules/*` and `themes/*` from a host into shared repositories, tags them and updates Packagist. It is unchanged, apart from the guard limiting it to `liberusoftware/project-ecommerce-laravel-filament`, which `modules.yml` now protects.
 
 **The problem.** It points the opposite way from independently maintained modules, and products overwrite each other. `module-users-roles` has sync commits from three products. `module-module-manager` took commits from five products on 2026-11-02, moving from `1.4.3` to `v1.6.2`, with `v` tags that skip the release gates that trigger only on bare tags ([ADR 0005](./adr/0005-bare-version-tags.md)). The GitHub API reports `main` unprotected on `module-users-roles`, `module-tenancy` and `module-module-manager`, so its review-PR path does not apply to them.
 
 **What this work did not change.** The publisher still exists, `modules/tenancy` and `modules/users-roles` are still tracked, and the merged publisher has still never run from this repository. The `packages/` directory is outside its paths, so it cannot publish the contracts or Printful. Nothing on this branch touches `modules/**`, so merging it will not trigger a run.
 
-**Decided: the publisher stays.** It is to be changed so that a run fails safely, publishing nothing, when the destination package repository has changes of its own since the last sync, rather than overwriting them. That change is not made yet, and until it is a sync can replace independent work in any package repository whose `main` is unprotected.
+**Decided: the publisher stays, and fails safely.** A run refuses, publishing nothing, when the destination package repository has changes since this repository's last sync to it, whether direct commits or another product's sync.
 
 Independently of that, `ecommerce-contracts` and `ecommerce-printful` are outside the publisher's paths and are still to be published from their own repositories, on bare tags.
 
@@ -369,7 +369,6 @@ Independently of that, `ecommerce-contracts` and `ecommerce-printful` are outsid
 
 | Decision | Recommendation | Who |
 | --- | --- | --- |
-| How does the publisher fail safely when a package repository has independent changes? (§11) | Refuse the run and publish nothing | You, with the maintainer |
 | Publish `ecommerce-contracts` and `ecommerce-printful`, and public or private? | Public on Packagist | You, with the maintainer |
 | One package per integration, against the fleet's four ([ADR 0016](./adr/0016-ecommerce-contracts-package.md)) | One. Needs a catalogue entry in `ECOMMERCE.md` for both packages | Upstream maintainer |
 | Do the wave `module-ecommerce-*` packages stay the plan? | Pause them. They have their own data model, and `module-ecommerce-dropshipping`'s manifest is invalid | Upstream maintainer |
