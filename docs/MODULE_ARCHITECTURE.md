@@ -122,7 +122,7 @@ module-ecommerce-acme/                 liberusoftware/ecommerce-acme
 }
 ```
 
-`module_type` is what puts a module on **Operations → Modules**. `feature` is something an administrator switches on and off, such as an integration. Leave it out, or set `infrastructure`, for what the application is built on, such as the module manager, tenancy and users and roles; those are never listed there. Requiring the package is not enough, and its vendor name plays no part.
+`module_type` is what puts a module on **Operations → Modules**, listed by its `display_name` with its `description` beneath. `feature` is something an administrator switches on and off, such as an integration. Leave it out, or set `infrastructure`, for what the application is built on, such as the module manager, tenancy and users and roles; those are never listed there. Requiring the package is not enough, and its vendor name plays no part.
 
 The rules `module:validate` enforces:
 

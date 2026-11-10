@@ -60,7 +60,11 @@ class ModuleManagementPageTest extends TestCase
             ->assertTableColumnStateSet('version', '0.1.0', 'ecommerce-printful')
             ->assertTableColumnStateSet('status', 'disabled', 'ecommerce-printful')
             ->assertTableActionVisible('enable', 'ecommerce-printful')
-            ->assertDontSee(['Stores allowed', 'Choose stores', 'built in', 'not installed']);
+            ->assertSee([
+                json_decode((string) file_get_contents(base_path('modules/ecommerce-dropxl/module.json')), true)['description'],
+                json_decode((string) file_get_contents(base_path('modules/ecommerce-printful/module.json')), true)['description'],
+            ])
+            ->assertDontSee(['Stores allowed', 'Choose stores', 'built in', 'not installed', 'Team Tenancy', 'Users Roles', 'Module Manager Administration']);
     }
 
     public function test_disabling_stops_the_module_registering_and_enabling_brings_it_back(): void
@@ -83,14 +87,16 @@ class ModuleManagementPageTest extends TestCase
         $this->assertTrue($this->nextBootIncludes(self::MODULE));
     }
 
-    public function test_the_modules_an_application_cannot_run_without_cannot_be_turned_off(): void
+    public function test_only_feature_modules_are_offered_and_infrastructure_stays_hidden(): void
     {
         $this->platformAdmin();
 
         $modules = app(Modules::class)->modules();
 
+        $this->assertSame(['ecommerce-dropxl', 'ecommerce-printful', self::MODULE], array_keys($modules));
+
         foreach (['tenancy', 'users-roles', 'module-manager', 'module-manager-filament'] as $infrastructure) {
-            $this->assertTrue(! isset($modules[$infrastructure]) || $modules[$infrastructure]['locked'] !== null, "{$infrastructure} can be switched off");
+            $this->assertArrayNotHasKey($infrastructure, $modules);
         }
     }
 

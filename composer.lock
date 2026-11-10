@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0f7e7561bba4fb85ac6809b48b38befc",
+    "content-hash": "cc19121b76134d30953933da7babd0eb",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5373,16 +5373,16 @@
         },
         {
             "name": "liberusoftware/module-manager",
-            "version": "1.8.0",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberusoftware/module-module-manager.git",
-                "reference": "91c0b069d55505eedf1861bf629b7cd5eec13601"
+                "reference": "372c9fc3cf688967bed7ffb315727cd7a7b4125e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liberusoftware/module-module-manager/zipball/91c0b069d55505eedf1861bf629b7cd5eec13601",
-                "reference": "91c0b069d55505eedf1861bf629b7cd5eec13601",
+                "url": "https://api.github.com/repos/liberusoftware/module-module-manager/zipball/372c9fc3cf688967bed7ffb315727cd7a7b4125e",
+                "reference": "372c9fc3cf688967bed7ffb315727cd7a7b4125e",
                 "shasum": ""
             },
             "require": {
@@ -5414,28 +5414,28 @@
             "description": "Deterministic manifest discovery and runtime enablement for Liberu modules.",
             "support": {
                 "issues": "https://github.com/liberusoftware/module-module-manager/issues",
-                "source": "https://github.com/liberusoftware/module-module-manager/tree/1.8.0"
+                "source": "https://github.com/liberusoftware/module-module-manager/tree/1.9.0"
             },
-            "time": "2026-11-09T23:46:56+00:00",
-            "published-time": "2026-11-09T23:47:08+00:00"
+            "time": "2026-11-10T16:14:46+00:00",
+            "published-time": "2026-11-10T16:15:10+00:00"
         },
         {
             "name": "liberusoftware/module-manager-filament",
-            "version": "1.8.0",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberusoftware/module-module-manager-filament.git",
-                "reference": "44a5fd16a0f051342e8de6427637c21c554a2a16"
+                "reference": "f4973b0bbd5ba8909f576390de0e8f273073d68f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liberusoftware/module-module-manager-filament/zipball/44a5fd16a0f051342e8de6427637c21c554a2a16",
-                "reference": "44a5fd16a0f051342e8de6427637c21c554a2a16",
+                "url": "https://api.github.com/repos/liberusoftware/module-module-manager-filament/zipball/f4973b0bbd5ba8909f576390de0e8f273073d68f",
+                "reference": "f4973b0bbd5ba8909f576390de0e8f273073d68f",
                 "shasum": ""
             },
             "require": {
                 "filament/filament": "^5.11.0",
-                "liberusoftware/module-manager": "^1.8",
+                "liberusoftware/module-manager": "^1.9",
                 "php": "^8.5"
             },
             "require-dev": {
@@ -5464,10 +5464,10 @@
             "description": "Filament operations presentation adapter for the Liberu Module Manager.",
             "support": {
                 "issues": "https://github.com/liberusoftware/module-module-manager-filament/issues",
-                "source": "https://github.com/liberusoftware/module-module-manager-filament/tree/1.8.0"
+                "source": "https://github.com/liberusoftware/module-module-manager-filament/tree/1.9.0"
             },
-            "time": "2026-11-10T00:23:39+00:00",
-            "published-time": "2026-11-10T00:25:27+00:00"
+            "time": "2026-11-10T20:20:01+00:00",
+            "published-time": "2026-11-10T20:20:50+00:00"
         },
         {
             "name": "liberusoftware/tenancy",
