@@ -124,64 +124,6 @@
     "prefer-stable": true,
     "repositories": [
         {
-            "type": "package",
-            "package": {
-                "name": "liberusoftware/module-manager",
-                "version": "1.8.0",
-                "type": "liberu-module",
-                "source": {
-                    "type": "git",
-                    "url": "https://github.com/liberusoftware/module-module-manager.git",
-                    "reference": "a3fe685a9b42ab945eb98455e5f5bd6d923031d9"
-                },
-                "require": {
-                    "php": "^8.5",
-                    "composer/semver": "^3.5.2",
-                    "illuminate/contracts": "^13.38.0",
-                    "illuminate/database": "^13.38.0",
-                    "illuminate/support": "^13.38.0"
-                },
-                "autoload": {
-                    "psr-4": {
-                        "Liberu\\Foundation\\ModuleManager\\": "src/"
-                    }
-                },
-                "extra": {
-                    "liberu": {
-                        "name": "module-manager"
-                    }
-                }
-            }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "liberusoftware/module-manager-filament",
-                "version": "1.8.0",
-                "type": "liberu-module",
-                "source": {
-                    "type": "git",
-                    "url": "https://github.com/liberusoftware/module-module-manager-filament.git",
-                    "reference": "bc614cd25dd42236ef010d4fb44ac2befc1235b6"
-                },
-                "require": {
-                    "php": "^8.5",
-                    "filament/filament": "^5.11.0",
-                    "liberusoftware/module-manager": "^1.8"
-                },
-                "autoload": {
-                    "psr-4": {
-                        "Liberu\\Foundation\\ModuleManagerFilament\\": "src/"
-                    }
-                },
-                "extra": {
-                    "liberu": {
-                        "name": "module-manager-filament"
-                    }
-                }
-            }
-        },
-        {
             "type": "path",
             "url": "modules/users-roles",
             "options": {
