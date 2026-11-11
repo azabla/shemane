@@ -18,22 +18,34 @@
         </include>
     </source>
     <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_DRIVER" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="PULSE_ENABLED" value="false"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
         <!--
-            Social login is opt-in in production (config/socialstream.php): providers
-            default to empty because nine were rendering with no credentials, so every
-            button 500'd on click. The suite still needs them enabled to exercise the
+            Forced as <server> and <env>: a container's real env vars otherwise win (docs/robit/DEVELOPMENT.md).
+
+            Social login is opt-in in production (config/socialstream.php): providers default to empty because
+            nine were rendering with no credentials. The suite still needs them enabled to exercise the
             registration flows, so the full list lives here rather than in the default.
         -->
-        <env name="SOCIALSTREAM_PROVIDERS" value="bitbucket,facebook,github,gitlab,google,linkedin,linkedin-openid,slack,twitter-oauth-2"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
+        <server name="APP_ENV" value="testing" force="true"/>
+        <server name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <server name="CACHE_DRIVER" value="array" force="true"/>
+        <server name="DB_CONNECTION" value="sqlite" force="true"/>
+        <server name="DB_DATABASE" value=":memory:" force="true"/>
+        <server name="MAIL_MAILER" value="array" force="true"/>
+        <server name="PULSE_ENABLED" value="false" force="true"/>
+        <server name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <server name="SOCIALSTREAM_PROVIDERS" value="bitbucket,facebook,github,gitlab,google,linkedin,linkedin-openid,slack,twitter-oauth-2" force="true"/>
+        <server name="SESSION_DRIVER" value="array" force="true"/>
+        <server name="TELESCOPE_ENABLED" value="false" force="true"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <env name="CACHE_DRIVER" value="array" force="true"/>
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="PULSE_ENABLED" value="false" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SOCIALSTREAM_PROVIDERS" value="bitbucket,facebook,github,gitlab,google,linkedin,linkedin-openid,slack,twitter-oauth-2" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="TELESCOPE_ENABLED" value="false" force="true"/>
     </php>
 </phpunit>
