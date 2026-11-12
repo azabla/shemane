@@ -7,15 +7,15 @@
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.11",
-        "@tailwindcss/postcss": "^4.3.3",
+        "@tailwindcss/postcss": "^4.3.5",
         "@tailwindcss/typography": "^0.5.20",
-        "@tailwindcss/vite": "^4.3.3",
-        "autoprefixer": "^10.6.1",
-        "laravel-vite-plugin": "^3.2.0",
+        "@tailwindcss/vite": "^4.3.5",
+        "autoprefixer": "^10.6.2",
+        "laravel-vite-plugin": "^3.2.1",
         "postcss": "^8.5.32",
         "postcss-nesting": "^14.0.3",
         "tailwindcss": "^4.3.3",
-        "vite": "^8.3.5",
+        "vite": "^8.3.6",
         "vite-plugin-static-copy": "^4.1.1"
     },
     "dependencies": {
