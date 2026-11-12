@@ -18,11 +18,11 @@ RH-M2-02,M2,P0,DevOps,Set up Docker development and persistent volumes,App/DB/Re
 RH-M2-03,M2,P0,DevOps,Add source mount and Vite HMR dev override,Blade/CSS changes update without image rebuild,M1,Done,,Blade/CSS seen in ~6s without rebuild (PROGRESS.md 2026-11-11)
 RH-M2-04,M2,P0,DevOps,Create local staging prod environment guidelines,No secrets committed; providers and DB isolated,M1,In progress,,DEVELOPMENT.md covers local; staging/prod guidance not written
 RH-M2-05,M2,P0,DevOps,Build CI for code quality tests and image,Pinned build and test jobs visible in PR,M1,In progress,,"Docker job builds, smoke-tests and serve-checks the image on every PR; publishing opt-in to GHCR; Dependabot grouped weekly"
-RH-M3-01,M3,P0,Security,Configure exactly one verified Robit merchant/store,No unauthorized new merchant creation; host maps correctly,M1,Not started,,
-RH-M3-02,M3,P0,Security,Implement scoped query/service policy protections,"Direct-ID, API and Filament cross-access denied",M1,Not started,,
-RH-M3-03,M3,P0,Payments,Remove free form money/status admin edits,Only domain actions change payment/order state,M1,Not started,,
+RH-M3-01,M3,P0,Security,Configure exactly one verified Robit merchant/store,No unauthorized new merchant creation; host maps correctly,M1,In progress,,Lock proven by SingleMerchantBoundaryTest (fails in saas mode). Real store name and domain await the owner
+RH-M3-02,M3,P0,Security,Implement scoped query/service policy protections,"Direct-ID, API and Filament cross-access denied",M1,In progress,,Direct-ID routes mapped to denial tests; CartLineOwnershipTest added. API serialisation (U-H3) open
+RH-M3-03,M3,P0,Payments,Remove free form money/status admin edits,Only domain actions change payment/order state,M1,Done,,Order form tamper test (ManualOrderTest:129); API status excludes money states; invoices view-only
 RH-M3-04,M3,P0,Security,Audit queue context and data boundaries,Async jobs read/write only authorized store records,M1,Not started,,
-RH-M3-05,M3,P0,QA,Add security regression suite,All documented critical gaps closed or release-blocked,M1,Not started,,
+RH-M3-05,M3,P0,QA,Add security regression suite,All documented critical gaps closed or release-blocked,M1,In progress,,tests/Feature/Robit/; controls run for each new test
 RH-M4-01,M4,P0,Frontend,Build design tokens and bilingual fonts,"Contrast, spacing and Ethiopic rendering validated",M3,Not started,,
 RH-M4-02,M4,P0,Frontend,Build responsive accessible header/search/nav/cart shell,Keyboard and 360px mobile test pass,M3,Not started,,
 RH-M4-03,M4,P0,Frontend,"Build editorial footer, policies and support entry","Accurate links, language/currency control and legal pages",M3,Not started,,
