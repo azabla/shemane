@@ -9,7 +9,7 @@
 | R-05 | Tests run inside the app container could wipe the dev database | Closed | SECURITY_GATE S-12, §5 (it happened once) | Tech | `<server force>` in `phpunit.xml`; proved with a canary host |
 | R-06 | Robit work pushed to the upstream repository, or audit detail published | Medium | `azabla/shemane` is public by the owner's choice | Owner | Upstream push URL disabled; `docs/robit/private/` gitignored and holds `SECURITY_GATE.md` |
 | R-11 | Another local project's Vite holds host port 5173 | Low | `dejeneethiopiagifts` vite on `127.0.0.1:5173` | Tech | `VITE_PORT=5174` in `.env` |
-| R-07 | Production image unbuildable without the RoadRunner packages in the committed lock | Medium | `BASELINE_AUDIT.md` §5 | Tech | Commit the lock change through the `composer-require` workflow |
+| R-07 | Production image unbuildable without the RoadRunner packages in the committed lock | Closed | `BASELINE_AUDIT.md` §5 | Tech | Locked by the `composer-require` workflow (`9e5f2a3`, PR #13); CI serve check `.github/scripts/smoke-serve.sh` |
 | R-08 | Queue jobs dispatched inside transactions run before commit | Medium | SECURITY_GATE U-H6 | Tech | `after_commit` / `afterCommit()` before a real queue (M6) |
 | R-09 | Upstream changes rapidly; merging upstream mid-build | Medium | Wave workflow in upstream `CLAUDE.md` | Tech | Pin `befbc58`; take upstream changes deliberately |
 | R-10 | Invented product, artisan or cultural facts reach production | High | Blueprint §1, §13 | Content | Synthetic fixtures labelled; publish gate (M5) |

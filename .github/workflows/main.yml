@@ -50,23 +50,27 @@ jobs:
         run: ./vendor/bin/phpunit --no-coverage
 
   docker:
-    if: github.event_name == 'push'
     needs: laravel-tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
       packages: write
+    env:
+      # Publishing is opt-in: set the repository variable PUBLISH_IMAGE=true.
+      PUBLISH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.PUBLISH_IMAGE == 'true' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
+        if: env.PUBLISH == 'true'
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
@@ -75,7 +79,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
-          images: liberu/ecommerce
+          images: ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -96,8 +100,8 @@ jobs:
           file: Dockerfile
           load: true
           tags: liberu/ecommerce:ci-smoke
-          cache-from: type=registry,ref=liberu/ecommerce:buildcache
-          cache-to: type=registry,ref=liberu/ecommerce:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Smoke test the image
         run: |
@@ -143,8 +147,12 @@ jobs:
           print(f"ok: {len(entries)} assets present, all referenced files exist")
           PY
 
+      - name: Image serves through Octane and passes its health check
+        run: .github/scripts/smoke-serve.sh liberu/ecommerce:ci-smoke
+
       # Reuses the layers just built and verified; this only uploads them.
       - name: Push Docker image
+        if: env.PUBLISH == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -152,4 +160,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=liberu/ecommerce:buildcache
+          cache-from: type=gha
