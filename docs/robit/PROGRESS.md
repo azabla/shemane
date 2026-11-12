@@ -2,6 +2,29 @@
 
 Newest first. Each entry follows the execution guide's milestone format (§C).
 
+## 2026-11-12 — M2 closed: environments and the `/health` fix
+
+**Objective.** Write staging and production guidance; explain the serve check's HTTP 400.
+
+**Finding.** `/` answered 400 because `TrustHosts` rejects `127.0.0.1` (only `APP_URL` and channel
+domains are trusted), which is correct. `/health` is meant to be exempt, but under Octane it also answered
+400: Symfony keeps the trusted-host list in a static, so once a worker had served any other request
+(Docker's own health probe is enough) every `/health` by IP failed. A probe on a pod address would have
+marked a healthy app as down.
+
+**Changes.**
+- `app/Http/Middleware/TrustHosts.php` — `/health` clears the trusted-host list before it runs.
+- `tests/Feature/TrustedHostsTest.php` — reproduces a worker that kept a previous request's list.
+- `.github/scripts/smoke-serve.sh` — also requires `/` on a trusted host to answer below 500, and
+  `/health` by IP to return its JSON eight times in a row.
+- `docs/robit/ENVIRONMENTS.md` (RH-M2-04).
+
+**Tests and results.**
+- New test failed before the fix (400), passed after; `TrustedHostsTest` and `ChannelResolutionTest`
+  16 passed.
+- `smoke-serve.sh`: pre-fix image fails ("/health by IP answered: <!DOCTYPE html>…"); fixed image passes
+  (`/` 404 on an empty database, `/health` 503 `degraded` with no database file).
+
 ## 2026-11-12 — M2 remote and CI
 
 **Objective.** Own remote; every PR shows build, test and image results.
