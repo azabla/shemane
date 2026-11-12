@@ -216,6 +216,8 @@ RUN mkdir -p \
 # Copy configuration files
 COPY --chown=${USER}:${USER} .docker/supervisord.conf /etc/supervisor/
 COPY --chown=${USER}:${USER} .docker/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
+COPY --chown=${USER}:${USER} .docker/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.15 /usr/bin/rr /usr/local/bin/rr
 COPY --chown=${USER}:${USER} .docker/supervisord.horizon.conf /etc/supervisor/conf.d/
 COPY --chown=${USER}:${USER} .docker/supervisord.reverb.conf /etc/supervisor/conf.d/
 COPY --chown=${USER}:${USER} .docker/supervisord.scheduler.conf /etc/supervisor/conf.d/
@@ -234,5 +236,5 @@ EXPOSE 8080
 
 ENTRYPOINT ["start-container"]
 
-HEALTHCHECK --start-period=5s --interval=2s --timeout=5s --retries=8 CMD php artisan octane:status || exit 1
+HEALTHCHECK --start-period=180s --interval=10s --timeout=5s --retries=3 CMD curl -s -o /dev/null http://127.0.0.1:8000/ || exit 1
 
