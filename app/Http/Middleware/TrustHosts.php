@@ -44,6 +44,9 @@ class TrustHosts extends Middleware
     public function handle(Request $request, $next)
     {
         if ($request->is('health')) {
+            // Static: under Octane the previous request's list would still apply.
+            Request::setTrustedHosts([]);
+
             return $next($request);
         }
 
