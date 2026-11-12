@@ -7,6 +7,7 @@ use App\Models\Channel;
 use App\Models\ChannelDomain;
 use App\Models\Store;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
@@ -150,5 +151,17 @@ class TrustedHostsTest extends TestCase
         Cache::forget(TrustHosts::CACHE_KEY);
 
         $this->assertTrue($this->isTrusted(parse_url(config('app.url'), PHP_URL_HOST)));
+    }
+
+    // An Octane worker keeps the trusted-host list a previous request set.
+    public function test_health_answers_on_any_host_after_another_request_set_the_list(): void
+    {
+        Request::setTrustedHosts(['^localhost$']);
+
+        try {
+            $this->get('http://10.0.0.7/health')->assertOk()->assertJson(['status' => 'ok']);
+        } finally {
+            Request::setTrustedHosts([]);
+        }
     }
 }

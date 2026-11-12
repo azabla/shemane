@@ -16,8 +16,8 @@ RH-M1-07,M1,P0,Architecture,Create upstream feature mapping and ADR register,"Re
 RH-M2-01,M2,P0,DevOps,Connect own origin and preserve upstream history/license,"Git remotes, own private repo and MIT notices verified",M1,Done,,"origin = azabla/shemane (public by owner choice), upstream fetch-only; history and MIT LICENSE preserved"
 RH-M2-02,M2,P0,DevOps,Set up Docker development and persistent volumes,App/DB/Redis/Mailpit available and restarts preserve DB,M1,Done,,compose.dev.yaml; down/up keeps DB (PROGRESS.md 2026-11-11)
 RH-M2-03,M2,P0,DevOps,Add source mount and Vite HMR dev override,Blade/CSS changes update without image rebuild,M1,Done,,Blade/CSS seen in ~6s without rebuild (PROGRESS.md 2026-11-11)
-RH-M2-04,M2,P0,DevOps,Create local staging prod environment guidelines,No secrets committed; providers and DB isolated,M1,In progress,,DEVELOPMENT.md covers local; staging/prod guidance not written
-RH-M2-05,M2,P0,DevOps,Build CI for code quality tests and image,Pinned build and test jobs visible in PR,M1,In progress,,"Docker job builds, smoke-tests and serve-checks the image on every PR; publishing opt-in to GHCR; Dependabot grouped weekly"
+RH-M2-04,M2,P0,DevOps,Create local staging prod environment guidelines,No secrets committed; providers and DB isolated,M1,Done,,"ENVIRONMENTS.md: per-environment settings, isolation and release rules"
+RH-M2-05,M2,P0,DevOps,Build CI for code quality tests and image,Pinned build and test jobs visible in PR,M1,Done,,"Docker job builds, smoke-tests and serve-checks the image on every PR (#14); publishing opt-in to GHCR; Dependabot grouped weekly"
 RH-M3-01,M3,P0,Security,Configure exactly one verified Robit merchant/store,No unauthorized new merchant creation; host maps correctly,M1,Not started,,
 RH-M3-02,M3,P0,Security,Implement scoped query/service policy protections,"Direct-ID, API and Filament cross-access denied",M1,Not started,,
 RH-M3-03,M3,P0,Payments,Remove free form money/status admin edits,Only domain actions change payment/order state,M1,Not started,,

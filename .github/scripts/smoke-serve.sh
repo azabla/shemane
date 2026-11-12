@@ -22,7 +22,14 @@ for _ in $(seq 1 60); do
   code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/" || true)
   if [ "$health" = healthy ] && [ "$code" != 000 ]; then
     docker exec "$name" sh -c 'pgrep -x rr >/dev/null' || { echo "FAIL: port answers but rr is not running"; exit 1; }
-    echo "ok: rr serving on 8000 (HTTP $code), container $health"
+    home=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: localhost' "http://127.0.0.1:$port/")
+    [ "$home" -lt 500 ] || { echo "FAIL: / on a trusted host answered $home"; docker logs "$name" 2>&1 | tail -50; exit 1; }
+    # Probes arrive on an IP; repeat so every worker has served a non-health request first.
+    for _ in 1 2 3 4 5 6 7 8; do
+      body=$(curl -s -H 'Host: 10.0.0.7' "http://127.0.0.1:$port/health")
+      case "$body" in *'"status"'*) ;; *) echo "FAIL: /health by IP answered: ${body:0:120}"; exit 1 ;; esac
+    done
+    echo "ok: rr serving on 8000 (/ on localhost: HTTP $home; /health by IP: $body), container $health"
     exit 0
   fi
   if [ "$(docker inspect -f '{{.State.Running}}' "$name")" != true ]; then
