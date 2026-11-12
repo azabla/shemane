@@ -2,6 +2,28 @@
 
 Newest first. Each entry follows the execution guide's milestone format (§C).
 
+## 2026-11-12 — M3 slice 1: single-merchant boundary and direct-ID access
+
+**Objective.** Prove, by direct requests, that nobody opens a second merchant, store staff stay out of
+the platform panel, and one customer cannot change another's records.
+
+**Baseline verified.** Most protections already exist upstream with tests; the gaps were direct requests
+against team creation, a sweep of `/admin` for store roles, and cart lines by id.
+
+**Changes.** Tests only, no application code:
+- `tests/Feature/Robit/SingleMerchantBoundaryTest.php` — 8 tests: every team/store creation path refused
+  in single mode; every parameter-free `/admin` page refused for the four store roles.
+- `tests/Feature/Robit/CartLineOwnershipTest.php` — another customer or a guest cannot change or remove a
+  cart line by id.
+
+**Tests and results.** 10 passed. Each was shown to fail when the protection is removed: all 7 creation
+tests fail in `saas` mode; both cart tests fail with the owner filter removed from `CartService`.
+Already covered upstream and recorded rather than duplicated: order-form money fields, API status and
+refunds, order confirmation, chat, payment methods, downloads, returns.
+
+**Open in M3.** Queue context (RH-M3-04); the real Robit store record and domain (owner's facts); API
+serialisation (U-H3).
+
 ## 2026-11-12 — M2 remote and CI
 
 **Objective.** Own remote; every PR shows build, test and image results.
