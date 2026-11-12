@@ -2,6 +2,25 @@
 
 Newest first. Each entry follows the execution guide's milestone format (§C).
 
+## 2026-11-12 — M2 remote and CI
+
+**Objective.** Own remote; every PR shows build, test and image results.
+
+**Changes.**
+- Remotes: `origin` = `azabla/shemane` (public by owner choice), `upstream` fetch-only. Security findings
+  kept in gitignored `docs/robit/private/`.
+- RoadRunner packages locked by the `composer-require` workflow (`9e5f2a3`); PRs #13 and #12 merged.
+- `.github/workflows/main.yml` — Docker job runs on PRs, no Docker Hub login, GHA build cache, new serve
+  check; push to `ghcr.io/azabla/shemane` only when repository variable `PUBLISH_IMAGE=true`.
+- `.github/scripts/smoke-serve.sh` — starts the image, waits for health and HTTP on 8000, checks `rr` runs.
+- `.github/dependabot.yml` — weekly, one grouped PR per ecosystem.
+
+**Tests and results.**
+- CI on #12 and #13: all 14 checks pass; `docker` skipped on PRs before this change.
+- `smoke-serve.sh` locally: production image healthy, `rr` serving on 8000 in 138 s; against
+  `php:8.5-cli-alpine` it fails ("container exited"), as it should.
+- `sync-packages.yml` unchanged: its job is guarded to `liberusoftware/project-ecommerce-laravel-filament`.
+
 ## 2026-11-11 — M2 repeatable development environment (in progress)
 
 **Objective.** Edit code without rebuilding the image; keep data across restarts; tests safe to run in
