@@ -44,3 +44,6 @@ rr
 # PHP's default error log lands here under some server configurations. It was
 # committed once, leaking the deployment path in every line.
 /error_log
+
+# Robit security findings; the repository is public
+/docs/robit/private/

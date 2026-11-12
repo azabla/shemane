@@ -16,6 +16,18 @@ const themeInputs = existsSync('themes')
 
 
 export default defineConfig({
+    // Only inside compose.dev.yaml's vite service; the browser reaches it through a forwarded localhost port.
+    server: process.env.VITE_DEV_SERVER ? {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        origin: process.env.VITE_DEV_ORIGIN ?? 'http://localhost:5173',
+        hmr: {
+            host: process.env.VITE_HMR_HOST ?? 'localhost',
+            clientPort: Number(process.env.VITE_HMR_CLIENT_PORT ?? 5173),
+        },
+        watch: { ignored: ['**/storage/**', '**/vendor/**', '**/bootstrap/cache/**', '**/.composer/**'] },
+    } : undefined,
     plugins: [
         laravel({
             input: [
